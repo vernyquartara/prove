@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss,sss} %-5level %logger - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+
+	<logger name="org.hibernate.loader.plan" level="info"/>
+	<logger name="org.hibernate.loader.entity.plan" level="info"/>
+	<logger name="org.hibernate.id" level="info"/>
+	<logger name="org.hibernate.persister" level="info"/>
+	<logger name="org.hibernate.type.BasicTypeRegistry" level="info"/>
+	<logger name="org.hibernate.cfg.Ejb3Column" level="info"/>
+	<logger name="org.hibernate.cfg.annotations.SimpleValueBinder" level="info"/>
+
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

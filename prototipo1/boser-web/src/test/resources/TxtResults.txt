@@ -1,0 +1,16 @@
+BOSER - Boring Search Engine
+Realizzato da Verny Quartara per CP Informatica
+www.boring.it
+anno 2008
+
+
+RISULTATI DELLA RICERCA
+
+2 risultati per key1
+
+1)http://....1
+title1
+
+2)http://....2
+title2
+

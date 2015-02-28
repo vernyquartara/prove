@@ -8,7 +8,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import it.quartara.boser.model.SearchResult;
+import it.quartara.boser.model.Search;
 
 import java.io.IOException;
 
@@ -31,9 +31,9 @@ public class SearchDowloadServletTest {
 		ServletOutputStream out = mock(ServletOutputStream.class);
 		ServletContext context = mock(ServletContext.class);
 		Long searchId = 10L;
-		SearchResult searchResult  = new SearchResult();
+		Search search  = new Search();
 		String zipFilePath = "src/test/resources/searchResult.zip";
-		searchResult.setZipFilePath(zipFilePath);
+		search.setZipFilePath(zipFilePath);
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = mock(EntityManager.class);
 		SearchDownloadServlet servlet = spy(new SearchDownloadServlet());
@@ -43,7 +43,7 @@ public class SearchDowloadServletTest {
 		doReturn(context).when(servlet).getServletContext();
 		when(context.getAttribute("emf")).thenReturn(emf);
 		when(emf.createEntityManager()).thenReturn(em);
-		when(em.find(SearchResult.class, searchId)).thenReturn(searchResult);
+		when(em.find(Search.class, searchId)).thenReturn(search);
 		when(response.getOutputStream()).thenReturn(out);
 		
 		servlet.doGet(request, response);

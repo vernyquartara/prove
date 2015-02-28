@@ -1,6 +1,6 @@
 package it.quartara.boser.servlet;
 
-import it.quartara.boser.model.SearchResult;
+import it.quartara.boser.model.Search;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +41,11 @@ public class SearchDownloadServlet extends BoserServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String searchId = request.getParameter("searchResultId");
+		String searchId = request.getParameter("searchId");
 		log.debug("ricerca searchResult per id {}", searchId);
 		
 		EntityManager em = getEntityManager();
-		SearchResult searchResult = em.find(SearchResult.class, Long.valueOf(searchId));
+		Search searchResult = em.find(Search.class, Long.valueOf(searchId));
 		String zipFilePath = searchResult.getZipFilePath();
 		File zipFile = new File(zipFilePath);
 		String attachmentName = zipFilePath.substring(zipFilePath.lastIndexOf("/")+1);

@@ -1,53 +1,51 @@
 package it.quartara.boser.model;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name="SEARCH_RESULTS",  
-	   uniqueConstraints=@UniqueConstraint(columnNames={"link","key_id"}))
-public class SearchResult extends PersistentEntity {
+@Table(name="SEARCH_RESULTS")
+@IdClass(SearchResultPK.class)
+public class SearchResult {
 	
-	private Date timestamp;
-	@ManyToOne
-	private SearchConfig config;
-	private String link;
+	@Id
+	private String url;
+	@Id
 	@ManyToOne
 	private SearchKey key;
-	private String zipFilePath;
+	@Id
+	@ManyToOne
+	private Search search;
 	
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-	public SearchConfig getConfig() {
-		return config;
-	}
-	public void setConfig(SearchConfig config) {
-		this.config = config;
-	}
-	public String getLink() {
-		return link;
-	}
-	public void setLink(String link) {
-		this.link = link;
-	}
+	private String title;
+	private String content;
+	
 	public SearchKey getKey() {
 		return key;
 	}
 	public void setKey(SearchKey key) {
 		this.key = key;
 	}
-	public String getZipFilePath() {
-		return zipFilePath;
+	public String getUrl() {
+		return url;
 	}
-	public void setZipFilePath(String zipFilePath) {
-		this.zipFilePath = zipFilePath;
+	public void setUrl(String url) {
+		this.url = url;
 	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
 }
