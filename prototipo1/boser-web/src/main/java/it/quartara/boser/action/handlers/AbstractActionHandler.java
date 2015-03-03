@@ -1,10 +1,15 @@
 package it.quartara.boser.action.handlers;
 
+import it.quartara.boser.action.ActionException;
+import it.quartara.boser.model.Search;
+import it.quartara.boser.model.SearchKey;
+
 import javax.persistence.EntityManager;
+
+import org.apache.solr.common.SolrDocumentList;
 
 abstract public class AbstractActionHandler implements ActionHandler {
 	
-	@SuppressWarnings("unused")
 	private ActionHandler nextHandler;
 	
 	protected EntityManager em;
@@ -19,10 +24,20 @@ abstract public class AbstractActionHandler implements ActionHandler {
 		super();
 		this.em = em;
 	}
+	
+	@Override
+	public void handle(Search search, SearchKey key, SolrDocumentList documents) throws ActionException {
+		this.execute(search, key, documents);
+		if (nextHandler != null) {
+			nextHandler.handle(search, key, documents);
+		}
+	}
+	
+	abstract protected void execute(Search search, SearchKey key, SolrDocumentList documents) throws ActionException;
 
 	@Override
 	public void setNextHandler(ActionHandler nextHandler) {
 		this.nextHandler = nextHandler;
 	}
-
+	
 }

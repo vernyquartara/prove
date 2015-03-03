@@ -1,6 +1,7 @@
 package it.quartara.boser.action.handlers;
 
-import it.quartara.boser.model.SearchConfig;
+import static it.quartara.boser.model.IndexField.*;
+import it.quartara.boser.model.Search;
 import it.quartara.boser.model.SearchKey;
 import it.quartara.boser.model.SearchResult;
 
@@ -21,13 +22,14 @@ public class SearchResultPersisterHandler extends AbstractActionHandler {
 	}
 
 	@Override
-	public void handle(SearchConfig config, SearchKey key, SolrDocumentList documents) {
+	protected void execute(Search search, SearchKey key, SolrDocumentList documents) {
 		for (SolrDocument doc : documents) {
 			SearchResult searchResult = new SearchResult();
+			searchResult.setSearch(search);
 			searchResult.setKey(key);
-			searchResult.setUrl(doc.getFieldValue("url").toString());
-			searchResult.setContent(doc.getFieldValue("content").toString());
-			searchResult.setTitle(doc.getFieldValue("title").toString());
+			searchResult.setUrl((String) doc.getFieldValue(URL.toString()));
+			searchResult.setContent((String) doc.getFieldValue(CONTENT.toString()));
+			searchResult.setTitle((String) doc.getFieldValue(TITLE.toString()));
 			em.persist(searchResult);
 		}
 	}

@@ -1,16 +1,14 @@
 package it.quartara.boser.action.handlers;
 
 import it.quartara.boser.action.ActionException;
+import it.quartara.boser.model.IndexField;
 import it.quartara.boser.model.Parameter;
-import it.quartara.boser.model.SearchConfig;
+import it.quartara.boser.model.Search;
 import it.quartara.boser.model.SearchKey;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.persistence.EntityManager;
 
@@ -36,12 +34,10 @@ public class TxtResultWriterHandler extends AbstractActionHandler {
 	}
 
 	@Override
-	public void handle(SearchConfig config, SearchKey key, SolrDocumentList documents) throws ActionException {
+	protected void execute(Search search, SearchKey key, SolrDocumentList documents) throws ActionException {
 		Parameter param = em.find(Parameter.class, "SEARCH_REPO");
 		String repo = param.getValue();
-		Date now = new Date();
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-		File repoDir = new File(repo+File.separator+config.getId()+File.separator+format.format(now));
+		File repoDir = new File(repo+File.separator+search.getConfig().getId()+File.separator+search.getId());
 		repoDir.mkdirs();
 		File outputFile = new File(repoDir.getAbsolutePath()+File.separator+key.getText()+".txt");
 		try {
@@ -51,8 +47,8 @@ public class TxtResultWriterHandler extends AbstractActionHandler {
 			writer.println(documents.size()+" risultati per "+key.getText()+"\r\n");
 			for (int i = 0; i < documents.size(); i++) {
 				SolrDocument doc = documents.get(i);
-				writer.println(i+1+")"+doc.getFieldValue("url"));
-				writer.println(doc.getFieldValue("title")+"\r\n");
+				writer.println(i+1+")"+doc.getFieldValue(IndexField.URL.toString()));
+				writer.println(doc.getFieldValue(IndexField.TITLE.toString())+"\r\n");
 			}
 			writer.close();
 		} catch (IOException e) {

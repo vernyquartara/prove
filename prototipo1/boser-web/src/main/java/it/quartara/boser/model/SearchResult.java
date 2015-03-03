@@ -1,5 +1,6 @@
 package it.quartara.boser.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -21,6 +22,7 @@ public class SearchResult {
 	private Search search;
 	
 	private String title;
+	@Column(name="content", length=1024)
 	private String content;
 	
 	public SearchKey getKey() {
@@ -46,6 +48,12 @@ public class SearchResult {
 	}
 	public void setContent(String content) {
 		this.content = content;
+	}
+	public Search getSearch() {
+		return search;
+	}
+	public void setSearch(Search search) {
+		this.search = search;
 	}
 	
 }

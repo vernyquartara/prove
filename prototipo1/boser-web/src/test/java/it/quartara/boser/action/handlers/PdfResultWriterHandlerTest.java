@@ -15,6 +15,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 import it.quartara.boser.model.Parameter;
+import it.quartara.boser.model.Search;
 import it.quartara.boser.model.SearchConfig;
 import it.quartara.boser.model.SearchKey;
 
@@ -25,9 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
@@ -67,6 +65,9 @@ public class PdfResultWriterHandlerTest {
 		config.setId(10L);
 		SearchKey key = new SearchKey();
 		key.setText("key");
+		Search search = new Search();
+		search.setConfig(config);
+		search.setId(11L);
 		
 		SolrDocumentList docs = ActionHandlerTestHelper.createSolrDocumentList();
 		
@@ -74,13 +75,11 @@ public class PdfResultWriterHandlerTest {
 		PDFTranscoder transcoder = mock(PDFTranscoder.class);
 		
 		when(em.find(Parameter.class, "SEARCH_REPO")).thenReturn(param);
-		Calendar calendar = new GregorianCalendar(2015, 1, 18, 22, 05);
-		whenNew(Date.class).withNoArguments().thenReturn(calendar.getTime());
 		whenNew(ImageRenderer.class).withNoArguments().thenReturn(imageRenderer);
 		whenNew(PDFTranscoder.class).withNoArguments().thenReturn(transcoder);
 		
 		PdfResultWriterHandler handler = spy(new PdfResultWriterHandler(em));
-		handler.handle(config, key, docs);
+		handler.handle(search, key, docs);
 		
 		verify(imageRenderer, times(2)).renderURL(any(String.class), any(ByteArrayOutputStream.class), eq(ImageRenderer.Type.SVG));
 		verify(transcoder, times(2)).transcode(any(TranscoderInput.class), any(TranscoderOutput.class));
@@ -96,6 +95,9 @@ public class PdfResultWriterHandlerTest {
 		config.setId(10L);
 		SearchKey key = new SearchKey();
 		key.setText("key");
+		Search search = new Search();
+		search.setConfig(config);
+		search.setId(11L);
 		
 		SolrDocumentList docs = ActionHandlerTestHelper.createSolrDocumentList();
 		
@@ -103,8 +105,6 @@ public class PdfResultWriterHandlerTest {
 		PDFTranscoder transcoder = mock(PDFTranscoder.class);
 		
 		when(em.find(Parameter.class, "SEARCH_REPO")).thenReturn(param);
-		Calendar calendar = new GregorianCalendar(2015, 1, 18, 22, 05);
-		whenNew(Date.class).withNoArguments().thenReturn(calendar.getTime());
 		whenNew(ImageRenderer.class).withNoArguments().thenReturn(imageRenderer);
 		whenNew(PDFTranscoder.class).withNoArguments().thenReturn(transcoder);
 		
@@ -113,7 +113,7 @@ public class PdfResultWriterHandlerTest {
 		
 		PdfResultWriterHandler handler = spy(new PdfResultWriterHandler(em));
 		doNothing().when(handler, "createErrorFile", any(String.class), any(File.class), any(Exception.class));
-		handler.handle(config, key, docs);
+		handler.handle(search, key, docs);
 		
 		verifyPrivate(handler, times(2)).invoke("createErrorFile", any(String.class), any(File.class), any(Exception.class));
 	}
@@ -128,6 +128,9 @@ public class PdfResultWriterHandlerTest {
 		config.setId(10L);
 		SearchKey key = new SearchKey();
 		key.setText("key");
+		Search search = new Search();
+		search.setConfig(config);
+		search.setId(11L);
 		
 		SolrDocumentList docs = ActionHandlerTestHelper.createSolrDocumentList();
 		
@@ -135,8 +138,6 @@ public class PdfResultWriterHandlerTest {
 		PDFTranscoder transcoder = mock(PDFTranscoder.class);
 		
 		when(em.find(Parameter.class, "SEARCH_REPO")).thenReturn(param);
-		Calendar calendar = new GregorianCalendar(2015, 1, 18, 22, 05);
-		whenNew(Date.class).withNoArguments().thenReturn(calendar.getTime());
 		whenNew(ImageRenderer.class).withNoArguments().thenReturn(imageRenderer);
 		whenNew(PDFTranscoder.class).withNoArguments().thenReturn(transcoder);
 		whenNew(TranscoderOutput.class).withParameterTypes(OutputStream.class).withArguments(any(FileOutputStream.class))
@@ -145,7 +146,7 @@ public class PdfResultWriterHandlerTest {
 		doThrow(new TranscoderException("")).when(transcoder).transcode(any(TranscoderInput.class), any(TranscoderOutput.class));
 		
 		PdfResultWriterHandler handler = new PdfResultWriterHandler(em);
-		handler.handle(config, key, docs);
+		handler.handle(search, key, docs);
 		
 		verify(imageRenderer, times(2)).renderURL(any(String.class), any(ByteArrayOutputStream.class), eq(ImageRenderer.Type.SVG));
 		verify(transcoder).transcode(any(TranscoderInput.class), any(TranscoderOutput.class));

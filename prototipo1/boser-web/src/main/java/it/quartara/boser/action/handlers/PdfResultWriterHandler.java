@@ -1,7 +1,11 @@
 package it.quartara.boser.action.handlers;
 
-import static it.quartara.boser.model.IndexField.URL;
 import static it.quartara.boser.model.IndexField.TITLE;
+import static it.quartara.boser.model.IndexField.URL;
+import it.quartara.boser.action.ActionException;
+import it.quartara.boser.model.Parameter;
+import it.quartara.boser.model.Search;
+import it.quartara.boser.model.SearchKey;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,16 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.persistence.EntityManager;
-
-import it.quartara.boser.action.ActionException;
-import it.quartara.boser.model.Parameter;
-import it.quartara.boser.model.SearchConfig;
-import it.quartara.boser.model.SearchKey;
 
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderException;
@@ -55,13 +51,10 @@ public class PdfResultWriterHandler extends AbstractActionHandler {
 	}
 
 	@Override
-	public void handle(SearchConfig config, SearchKey key,
-			SolrDocumentList documents) throws ActionException {
+	protected void execute(Search search, SearchKey key, SolrDocumentList documents) throws ActionException {
 		Parameter param = em.find(Parameter.class, "SEARCH_REPO");
 		String repo = param.getValue();
-		Date now = new Date();
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-		File repoDir = new File(repo+File.separator+config.getId()+File.separator+format.format(now));
+		File repoDir = new File(repo+File.separator+search.getConfig().getId()+File.separator+search.getId());
 		repoDir.mkdirs();
 		
 		ImageRenderer imageRenderer = new ImageRenderer();

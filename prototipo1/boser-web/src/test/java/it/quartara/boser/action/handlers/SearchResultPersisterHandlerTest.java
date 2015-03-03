@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import it.quartara.boser.model.Search;
 import it.quartara.boser.model.SearchKey;
 import it.quartara.boser.model.SearchResult;
 
@@ -26,6 +27,9 @@ public class SearchResultPersisterHandlerTest {
 		EntityManager em = mock(EntityManager.class);
 		SearchKey key = new SearchKey();
 		key.setText("key1");
+		Search search = new Search();
+		search.setConfig(null);
+		search.setId(11L);
 		
 		String url1 = "http://....1";
 		String title1 = "result1";
@@ -48,7 +52,7 @@ public class SearchResultPersisterHandlerTest {
 		docs.add(doc2);
 	
 		SearchResultPersisterHandler handler = new SearchResultPersisterHandler(em);
-		handler.handle(null, key, docs);
+		handler.execute(search, key, docs);
 		
 		ArgumentCaptor<SearchResult> argument = ArgumentCaptor.forClass(SearchResult.class);
 		verify(em, times(2)).persist(argument.capture());
@@ -57,10 +61,12 @@ public class SearchResultPersisterHandlerTest {
 		assertThat(argument.getAllValues().get(0).getTitle(), equalTo(title1));
 		assertThat(argument.getAllValues().get(0).getContent(), equalTo(content1));
 		assertThat(argument.getAllValues().get(0).getKey(), equalTo(key));
+		assertThat(argument.getAllValues().get(0).getSearch(), equalTo(search));
 		
 		assertThat(argument.getAllValues().get(1).getUrl(), equalTo(url2));
 		assertThat(argument.getAllValues().get(1).getTitle(), equalTo(title2));
 		assertThat(argument.getAllValues().get(1).getContent(), equalTo(content2));
 		assertThat(argument.getAllValues().get(1).getKey(), equalTo(key));
+		assertThat(argument.getAllValues().get(1).getSearch(), equalTo(search));
 	}
 }

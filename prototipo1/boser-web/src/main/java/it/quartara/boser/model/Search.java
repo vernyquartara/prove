@@ -36,4 +36,11 @@ public class Search extends PersistentEntity {
 	public void setConfig(SearchConfig config) {
 		this.config = config;
 	}
+	public Index getIndex() {
+		return index;
+	}
+	public void setIndex(Index index) {
+		this.index = index;
+	}
+	
 }

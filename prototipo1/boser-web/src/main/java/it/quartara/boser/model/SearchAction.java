@@ -7,14 +7,20 @@ import javax.persistence.Table;
 @Table(name="SEARCH_ACTIONS")
 public class SearchAction extends PersistentEntity {
 
-	private String impl;
-
-	public String getImpl() {
-		return impl;
+	private String description;
+	private String handlerClass;
+	
+	public String getDescription() {
+		return description;
 	}
-
-	public void setImpl(String impl) {
-		this.impl = impl;
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getHandlerClass() {
+		return handlerClass;
+	}
+	public void setHandlerClass(String handlerClass) {
+		this.handlerClass = handlerClass;
 	}
 	
 }
