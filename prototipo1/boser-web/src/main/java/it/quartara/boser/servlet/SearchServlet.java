@@ -88,10 +88,10 @@ public class SearchServlet extends BoserServlet {
 				| SecurityException | InstantiationException
 				| IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
-			/*
-			 * TODO rollback!
-			 */
-			e.printStackTrace();
+			log.error("errore durante la creazione della catena di handlers", e);
+			em.getTransaction().rollback();
+			em.close();
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		for (SearchKey key : searchConfig.getKeys()) {
 			/*
@@ -105,11 +105,10 @@ public class SearchServlet extends BoserServlet {
 				log.debug("ricerca per chiave: "+key.getText());
 				queryResponse = solr.query(query);
 			} catch (SolrServerException e) {
-				/*
-				 * TODO fare rollback
-				 */
-				e.printStackTrace();
+				log.error("errore durante l'esecuzione della ricerca su Solr", e);
 				em.getTransaction().rollback();
+				em.close();
+				throw new ServletException(e);
 			}
 			SolrDocumentList docList = queryResponse.getResults();
 			
@@ -139,9 +138,10 @@ public class SearchServlet extends BoserServlet {
 		try {
 			zipFile = createZipFile(searchPath, now);
 		} catch (IOException e) {
-			/*
-			 * TODO rollback!
-			 */
+			log.error("errore durante la creazione del file zip", e);
+			em.getTransaction().rollback();
+			em.close();
+			throw new ServletException(e);
 		}
 		search.setZipFilePath(zipFile.getAbsolutePath());
 		em.merge(search);
@@ -149,7 +149,7 @@ public class SearchServlet extends BoserServlet {
 		em.getTransaction().commit();
 		em.close();
 		
-		RequestDispatcher rd = req.getRequestDispatcher("/searchHome.jsp");
+		RequestDispatcher rd = req.getRequestDispatcher("/searchHome");
 		rd.forward(req, resp);
 	}
 
@@ -196,7 +196,8 @@ public class SearchServlet extends BoserServlet {
 			
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".txt") || name.toLowerCase().endsWith(".pdf");
+				return name.toLowerCase().endsWith(".txt") || name.toLowerCase().endsWith(".pdf")
+						|| name.toLowerCase().endsWith(".xls");
 			}
 		});
 		for (File file : files) {

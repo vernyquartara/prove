@@ -42,5 +42,12 @@ public class Search extends PersistentEntity {
 	public void setIndex(Index index) {
 		this.index = index;
 	}
-	
+	public String getZipLabel() {
+		if (zipFilePath != null) {
+			int start = zipFilePath.lastIndexOf("/")+1; //FIXME se usato File.separator in inserimento, potrebbe non essere /
+			int end = zipFilePath.lastIndexOf(".");
+			return zipFilePath.substring(start, end);
+		}
+		return null;
+	}
 }

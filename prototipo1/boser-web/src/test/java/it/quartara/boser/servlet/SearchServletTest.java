@@ -16,6 +16,7 @@ import it.quartara.boser.action.handlers.ActionHandler;
 import it.quartara.boser.action.handlers.PdfResultWriterHandler;
 import it.quartara.boser.action.handlers.SearchResultPersisterHandler;
 import it.quartara.boser.action.handlers.TxtResultWriterHandler;
+import it.quartara.boser.model.Index;
 import it.quartara.boser.model.Parameter;
 import it.quartara.boser.model.Search;
 import it.quartara.boser.model.SearchAction;
@@ -67,6 +68,7 @@ public class SearchServletTest {
 		Parameter param = new Parameter();
 		param.setValue(repo);
 		EntityTransaction transaction = mock(EntityTransaction.class);
+		Index currentIndex = new Index();
 		
 		SearchServlet servlet = spy(new SearchServlet());
 		
@@ -76,11 +78,13 @@ public class SearchServletTest {
 		doNothing().when(transaction).begin();
 		when(em.find(Parameter.class, "SOLR_URL")).thenReturn(param);
 		when(em.find(SearchConfig.class, searchConfigId)).thenReturn(searchConfig);
+		
+		doReturn(currentIndex).when(servlet, "getCurrentIndex", em);
 		doReturn(handler).when(servlet, "createHandlerChain", searchConfig.getActions(), em);
 		whenNew(HttpSolrServer.class).withAnyArguments().thenReturn(solr); 
 		when(solr.query(any(SolrParams.class))).thenReturn(solrQuery);
 		when(solrQuery.getResults()).thenReturn(solrResults);
-		when(request.getRequestDispatcher("/searchHome.jsp")).thenReturn(rd);
+		when(request.getRequestDispatcher("/searchHome")).thenReturn(rd);
 		when(em.find(Parameter.class, "SEARCH_REPO")).thenReturn(param);
 		doReturn(new File("target/test-output/file.zip")).when(servlet, "createZipFile", any(String.class), any(Date.class));
 		doNothing().when(transaction).commit();

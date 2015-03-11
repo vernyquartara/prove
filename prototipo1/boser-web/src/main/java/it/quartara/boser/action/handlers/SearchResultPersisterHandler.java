@@ -28,7 +28,7 @@ public class SearchResultPersisterHandler extends AbstractActionHandler {
 			searchResult.setSearch(search);
 			searchResult.setKey(key);
 			searchResult.setUrl((String) doc.getFieldValue(URL.toString()));
-			searchResult.setContent((String) doc.getFieldValue(CONTENT.toString()));
+			//searchResult.setContent((String) doc.getFieldValue(CONTENT.toString()));
 			searchResult.setTitle((String) doc.getFieldValue(TITLE.toString()));
 			em.persist(searchResult);
 		}

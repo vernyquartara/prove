@@ -2,7 +2,7 @@ package it.quartara.boser.action.handlers;
 
 import static it.quartara.boser.model.IndexField.TITLE;
 import static it.quartara.boser.model.IndexField.URL;
-import static org.apache.poi.ss.usermodel.Cell.*;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 import it.quartara.boser.action.ActionException;
 import it.quartara.boser.model.Parameter;
 import it.quartara.boser.model.Search;
@@ -12,11 +12,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 
@@ -48,7 +48,8 @@ import org.apache.solr.common.SolrDocumentList;
  */
 public class XlsResultWriterHandler extends AbstractActionHandler {
 	
-	static Pattern urlPattern = Pattern.compile("http://[\\w|\\d]+\\.([\\w|d]+\\.[\\w|\\d]+)/.+$");
+	//static Pattern urlPattern = Pattern.compile("//[\\w|\\d]+\\.([\\w|\\d]+\\.[\\w|\\d]+)");
+	static final String JAVA_AWT_HEADLESS = "java.awt.headless";
 
 	public XlsResultWriterHandler(EntityManager em) {
 		super(em);
@@ -56,15 +57,16 @@ public class XlsResultWriterHandler extends AbstractActionHandler {
 
 	@Override
 	protected void execute(Search search, SearchKey key, SolrDocumentList documents) throws ActionException {
-		System.setProperty("java.awt.headless", "true");
+		String headless = System.getProperty(JAVA_AWT_HEADLESS);
+		System.setProperty(JAVA_AWT_HEADLESS, "true");
 		Parameter param = em.find(Parameter.class, "SEARCH_REPO");
 		String repo = param.getValue();
 		File repoDir = new File(repo+File.separator+search.getConfig().getId()+File.separator+search.getId());
 		repoDir.mkdirs();
 		
-		Date now = new Date();
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-		File outputFile = new File(repoDir.getAbsolutePath()+File.separator+format.format(now)+".xls");
+//		Date now = new Date();
+//		DateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+		File outputFile = new File(repoDir.getAbsolutePath()+File.separator+key.getText()+".xls");
 		FileOutputStream fileOut = null;
 	    try {
 			fileOut = new FileOutputStream(outputFile);
@@ -141,15 +143,22 @@ public class XlsResultWriterHandler extends AbstractActionHandler {
 			wb.close();
 		} catch (IOException e) {
 			throw new ActionException("unable to write to file: "+outputFile.getAbsolutePath());
+		} finally {
+			if (headless != null) {
+				System.setProperty(JAVA_AWT_HEADLESS, headless);
+			}
 		}
+		
 	}
 
 	private String getLinkLabel(String url) throws ActionException {
-		Matcher m = urlPattern.matcher(url);
-		if (m.matches()) {
-			return m.group(1);
+		try {
+			URL parsed = new URL(url);
+			String host = parsed.getHost();
+			return host.substring(host.indexOf(".")+1);
+		} catch (MalformedURLException e) {
+			throw new ActionException("unable to match link url in string: " + url, e);
 		}
-		throw new ActionException("unable to match link url in string: " + url);
 	}
 
 	private void createHeader(Sheet sheet, CellStyle style) {

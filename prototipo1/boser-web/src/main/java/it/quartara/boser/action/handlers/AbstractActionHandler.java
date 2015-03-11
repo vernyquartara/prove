@@ -27,6 +27,10 @@ abstract public class AbstractActionHandler implements ActionHandler {
 	
 	@Override
 	public void handle(Search search, SearchKey key, SolrDocumentList documents) throws ActionException {
+		/*
+		 * TODO gestire le eccezioni in modo che l'elaborazione continui fino
+		 * alla fine della catena
+		 */
 		this.execute(search, key, documents);
 		if (nextHandler != null) {
 			nextHandler.handle(search, key, documents);

@@ -1,6 +1,6 @@
 package it.quartara.boser.servlet;
 
-import it.quartara.boser.model.SearchResult;
+import it.quartara.boser.model.Search;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,8 +22,8 @@ public class SearchHomeServlet extends BoserServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		EntityManager em = getEntityManager();
-		List<SearchResult> searchResults = em.createQuery("from SearchResult", SearchResult.class).getResultList();
-		request.setAttribute("searchResults", searchResults);
+		List<Search> searches = em.createQuery("from Search", Search.class).getResultList();
+		request.setAttribute("searches", searches);
 		RequestDispatcher rd = request.getRequestDispatcher("/searchHome.jsp");
 		rd.forward(request, response);
 		em.close();

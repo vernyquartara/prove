@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -21,16 +22,12 @@ import it.quartara.boser.model.SearchKey;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -43,6 +40,7 @@ import org.powermock.api.mockito.mockpolicies.Slf4jMockPolicy;
 import org.powermock.core.classloader.annotations.MockPolicy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({XlsResultWriterHandler.class})
@@ -141,17 +139,13 @@ public class XlsResultWriterHandlerTest {
 		
 		return docs;
 	}
-
-	public static void main(String[] a) throws InvalidFormatException, IOException {
-		InputStream inp = new FileInputStream("/home/webny/work/Boser/gennaio2015/volvo_OK.xls");
-
-		Workbook wb = WorkbookFactory.create(inp);
-		Sheet sheet = wb.getSheetAt(0);
-		for (Row row : sheet) {
-			for (Cell cell : row) {
-				CellStyle style = cell.getCellStyle();
-				System.out.println(style.getFillForegroundColor());
-			}
-		}
+	
+	public void testGetLabel() throws Exception {
+		XlsResultWriterHandler handler = new XlsResultWriterHandler(null);
+		assertEquals("ultimissimeauto.com", (String)Whitebox.invokeMethod(handler, "getLinkLabel", "http://www.ultimissimeauto.com/"));
+		assertEquals("motomag.it", (String)Whitebox.invokeMethod(handler, "getLinkLabel", "http://auto.motomag.it/"));
+		assertEquals("autovideoblog.it", (String)Whitebox.invokeMethod(handler, "getLinkLabel", "http://www.autovideoblog.it/audi/"));
+		assertEquals("autovideoblog.co.uk", (String)Whitebox.invokeMethod(handler, "getLinkLabel", "http://it.autovideoblog.co.uk/weekly/"));
 	}
+
 }

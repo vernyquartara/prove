@@ -15,26 +15,38 @@
 
 <body>
 
-
 <div>
-ricerche effettuate (ricerca.txt)
-<c:forEach items="${searchResults}" var="result">
+ricerche effettuate
+<c:forEach items="${searches}" var="search">
 	<ul>
 		<li>
-			<a href="<c:url value="/searchDownload?searchResultId=${result.id}" />"><c:out value="${result.zipFilePath}"/></a>
+			<a href="
+				<c:url value="/searchDownload">
+					<c:param name="searchId" value="${search.id}"/>
+				</c:url>
+					">
+			<c:out value="${search.zipLabel}"/>
+			</a>
+			<%-- <a href="
+				<c:url value="/searchDownload">
+					<c:param name="srUrl" value="${result.url}"/>
+					<c:param name="srKey" value="${result.key.id}"/>
+					<c:param name="srSearch" value="${result.search.id}"/>
+				</c:url>
+					">
+			<c:out value="${result.zipFilePath}"/>
+			</a> --%>
 		</li>
 	</ul>
 </c:forEach>
 </div>
 
 <hr />
-<%--
 <div>
-<html:link action="search">effettua nuova ricerca </html:link>(usa l'indice più recente)
+<a href="<c:url value="/search?searchConfigId=1"/>">effettua nuova ricerca</a>&nbsp;(usa l'indice più recente)
 </div>
 
 <hr />
-<html:link href="/">pagina iniziale</html:link>
---%>
+<a href="<c:url value="/"/>">pagina iniziale</a>
 </body>
 </html>
