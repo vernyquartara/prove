@@ -3,7 +3,6 @@ package it.quartara.boser.servlet;
 import it.quartara.boser.model.Search;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import javax.persistence.EntityManager;
@@ -53,21 +52,10 @@ public class SearchDownloadServlet extends BoserServlet {
 		/*
 		 * download
 		 */
-		response.setContentType("application/octet-stream");
-	    response.setHeader("Content-Disposition","attachment;filename="+attachmentName);
-	    response.setContentLengthLong(zipFile.length());
 	    ServletOutputStream out = response.getOutputStream();
-	    FileInputStream input = new FileInputStream(zipFile);
-	    byte[] buffer = new byte[4096];
-        int bytesRead = -1;
-        while ((bytesRead = input.read(buffer)) != -1) {
-        	out.write(buffer, 0, bytesRead);
-        }
-        input.close();
-        out.flush();
+	    handleDownload(response, zipFile, attachmentName);
         out.close();
         em.close();
 	}
 
-	
 }

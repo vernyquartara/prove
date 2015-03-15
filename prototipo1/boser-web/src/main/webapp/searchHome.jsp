@@ -27,15 +27,6 @@ ricerche effettuate
 					">
 			<c:out value="${search.zipLabel}"/>
 			</a>
-			<%-- <a href="
-				<c:url value="/searchDownload">
-					<c:param name="srUrl" value="${result.url}"/>
-					<c:param name="srKey" value="${result.key.id}"/>
-					<c:param name="srSearch" value="${result.search.id}"/>
-				</c:url>
-					">
-			<c:out value="${result.zipFilePath}"/>
-			</a> --%>
 		</li>
 	</ul>
 </c:forEach>

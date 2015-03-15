@@ -18,7 +18,7 @@ public class Index extends PersistentEntity {
 	@ManyToOne
 	private IndexConfig config;
 	@Enumerated(EnumType.STRING)
-	private IndexState state;
+	private ExecutionState state;
 	
 	public Date getWhenStarted() {
 		return whenStarted;
@@ -44,10 +44,10 @@ public class Index extends PersistentEntity {
 	public void setConfig(IndexConfig config) {
 		this.config = config;
 	}
-	public IndexState getState() {
+	public ExecutionState getState() {
 		return state;
 	}
-	public void setState(IndexState state) {
+	public void setState(ExecutionState state) {
 		this.state = state;
 	}
 }

@@ -17,7 +17,7 @@
 
 <%-- <div><a href="<c:url value="/crawlHome"/>">crawl</a></div> --%>
 <div><a href="<c:url value="/searchHome"/>">ricerca</a></div>
-<%-- <div><a href="<c:url value="/conversionHome.jsp"/>">conversione in PDF</a></div> --%>
+<div><a href="<c:url value="/conversionHome"/>">conversione in PDF</a></div>
 
 </body>
 </html>

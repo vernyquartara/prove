@@ -1,6 +1,6 @@
 package it.quartara.boser.model;
 
-public enum IndexState {
+public enum ExecutionState {
 
 	STARTED,
 	COMPLETED;
