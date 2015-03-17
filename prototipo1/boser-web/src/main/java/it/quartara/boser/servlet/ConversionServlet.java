@@ -4,6 +4,7 @@ import it.quartara.boser.helper.UrlHelper;
 import it.quartara.boser.model.ExecutionState;
 import it.quartara.boser.model.Parameter;
 import it.quartara.boser.model.PdfConversion;
+import it.quartara.boser.workers.PdfConversionWorker;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,10 +16,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.persistence.EntityManager;
+import javax.servlet.AsyncContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,12 +46,16 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.fit.cssbox.demo.ImageRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-@WebServlet("/xlsToPdf")
+@WebServlet(asyncSupported = true, urlPatterns = { "/xlsToPdf" })
 public class ConversionServlet extends BoserServlet {
 
 	private static final long serialVersionUID = -6738304809439599277L;
+	
+	private static final Logger log = LoggerFactory.getLogger(ConversionServlet.class);
 
 	/*
 	 * Legge il file caricato dall'utente e lo scrive nel repository
@@ -120,9 +127,29 @@ public class ConversionServlet extends BoserServlet {
 			em.close();
 			throw new ServletException("problemi estrazione dei links dal file xls", e);
 		}
+		
+		/*
+		 * creazione oggetto PdfConversion
+		 * e avvio worker asincrono
+		 */
+		PdfConversion pdfConversion = new PdfConversion();
+		pdfConversion.setState(ExecutionState.STARTED);
+		pdfConversion.setStartDate(new Date());
+		em.persist(pdfConversion);
+		em.getTransaction().commit();
+		
+		String workDir = pdfRepo+"/"+originalName.substring(0, originalName.lastIndexOf("."));
+		request.setAttribute("pdfDestDir", workDir);
+		request.setAttribute("urlsList", urls);
+		request.setAttribute("pdfConversionId", pdfConversion.getId());
+		ThreadPoolExecutor executor = 
+				(ThreadPoolExecutor)request.getServletContext().getAttribute("executor");
+		AsyncContext asyncCtx = request.startAsync(request, response);
+		asyncCtx.setTimeout(0);
+		executor.execute(new PdfConversionWorker(asyncCtx));
+		
 		/*
 		 * conversione in pdf
-		 */
 		String workDir = pdfRepo+"/"+originalName.substring(0, originalName.lastIndexOf("."));
 		PdfConversion pdfConversion = new PdfConversion();
 		pdfConversion.setState(ExecutionState.STARTED);
@@ -136,21 +163,24 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("problemi di conversione in pdf", e);
 		}
 		pdfConversion.setNumberOfLinks(numberOfLinks);
+		 */
 		/*
 		 * creazione file zip
-		 */
 		File zipFile = createZipFile(workDir);
 		pdfConversion.setFilePath(zipFile.getAbsolutePath());
 		pdfConversion.setSize(zipFile.length());
+		 */
 		/*
 		 * chiusura transazione
 		 */
-		em.persist(pdfConversion);
-		em.getTransaction().commit();
 		em.close();
 		
+		
+		/*
+		 * non si effettua il dispatch nel caso di gestione asincrona
 		RequestDispatcher rd = request.getRequestDispatcher("/conversionHome");
 		rd.forward(request, response);
+		 */
 	}
 
 	private FileItem getFormField(List<FileItem> items, String fieldName) {
