@@ -99,9 +99,9 @@ public class PdfConversionWorker implements Runnable {
 		/*
 		 * completamento operazioni e chiusura transazione
 		 */
-		pdfConversion.setNumberOfLinks(numberOfLinks);
+		//pdfConversion.setNumberOfLinks(numberOfLinks);
 		pdfConversion.setFilePath(zipFilePath);
-		pdfConversion.setSize(zipFileSize);
+		pdfConversion.setFileSize(zipFileSize);
 		pdfConversion.setState(ExecutionState.COMPLETED);
 		em.merge(pdfConversion);
 		em.getTransaction().commit();

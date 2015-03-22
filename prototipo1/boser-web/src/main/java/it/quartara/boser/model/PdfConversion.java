@@ -11,24 +11,19 @@ import javax.persistence.Table;
 @Table(name="PDF_CONVERTIONS")
 public class PdfConversion extends PersistentEntity {
 
-	private short numberOfLinks;
-	private long size;
+	private short countCompleted;
+	private short countFailed;
+	private long fileSize;
 	private String filePath;
 	@Enumerated(EnumType.STRING)
 	private ExecutionState state;
 	private Date startDate;
 	
-	public short getNumberOfLinks() {
-		return numberOfLinks;
+	public long getFileSize() {
+		return fileSize;
 	}
-	public void setNumberOfLinks(short numberOfLinks) {
-		this.numberOfLinks = numberOfLinks;
-	}
-	public long getSize() {
-		return size;
-	}
-	public void setSize(long size) {
-		this.size = size;
+	public void setFileSize(long size) {
+		this.fileSize = size;
 	}
 	public String getFilePath() {
 		return filePath;
@@ -55,5 +50,17 @@ public class PdfConversion extends PersistentEntity {
 			return filePath.substring(start, end);
 		}
 		return null;
+	}
+	public short getCountCompleted() {
+		return countCompleted;
+	}
+	public void setCountCompleted(short countCompleted) {
+		this.countCompleted = countCompleted;
+	}
+	public short getCountFailed() {
+		return countFailed;
+	}
+	public void setCountFailed(short countFailed) {
+		this.countFailed = countFailed;
 	}
 }

@@ -8,6 +8,7 @@
 	</appender>
 
 
+	<logger name="org.hibernate" level="info"/>
 	<logger name="org.hibernate.loader.plan" level="info"/>
 	<logger name="org.hibernate.loader.entity.plan" level="info"/>
 	<logger name="org.hibernate.id" level="info"/>
@@ -15,6 +16,9 @@
 	<logger name="org.hibernate.type.BasicTypeRegistry" level="info"/>
 	<logger name="org.hibernate.cfg.Ejb3Column" level="info"/>
 	<logger name="org.hibernate.cfg.annotations.SimpleValueBinder" level="info"/>
+	<logger name="org.hibernate.hql" level="info"/>
+	<logger name="org.hibernate.engine" level="info"/>
+	<logger name="cz.vutbr" level="error"/>
 
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />

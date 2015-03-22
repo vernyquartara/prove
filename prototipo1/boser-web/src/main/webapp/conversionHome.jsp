@@ -30,10 +30,11 @@ conversioni effettuate
 	<thead>
 	<tr>
 		<th>Nome</th>
-		<th>Data</th>
+		<th>Data creazione</th>
 		<th>Stato</th>
-		<th>N° pdf</th>
-		<th>Dimensione (KB)</th>
+		<th>N° pdf OK</th>
+		<th>N° pdf KO</th>
+		<th>Dimensione zip (KB)</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -49,8 +50,9 @@ conversioni effettuate
 		</td>
 		<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
 		<td><c:out value="${conv.state}"/></td>
-		<td><c:out value="${conv.numberOfLinks}"/></td>
-		<td><fmt:formatNumber maxFractionDigits="0" value="${conv.size/1024}" /></td>
+		<td><c:out value="${conv.countCompleted}"/></td>
+		<td><c:out value="${conv.countFailed}"/></td>
+		<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
 	</tr>
 </c:forEach>
 	</tbody>
