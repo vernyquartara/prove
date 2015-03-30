@@ -1,31 +1,17 @@
 package it.quartara.boser.jobs;
 
-import it.quartara.boser.helper.UrlHelper;
 import it.quartara.boser.model.AsyncRequest;
 import it.quartara.boser.model.ExecutionState;
-import it.quartara.boser.service.PdfConversionFactory;
 import it.quartara.boser.service.PdfConversionService;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 
-import org.apache.batik.transcoder.Transcoder;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.fop.svg.PDFTranscoder;
-import org.fit.cssbox.demo.ImageRenderer;
 import org.quartz.Job;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -52,13 +38,13 @@ public class PdfConversionJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		log.debug("avvio conversione in pdf. url: {}", url);
+		String jobKey = context.getJobDetail().getKey().toString();
+		log.debug("avvio conversione in pdf, job: {}", jobKey);
 		File pdfFile = service.convertToPdf(destDir, url, pdfFileNamePrefix);
 		
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		AsyncRequest request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-		String jobKey = context.getJobDetail().getKey().toString();
 		ExecutionState state = ExecutionState.COMPLETED;
 		if (pdfFile == null) {
 			state = ExecutionState.ERROR;

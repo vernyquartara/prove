@@ -6,6 +6,24 @@
 			<pattern>%d{HH:mm:ss,sss} %-5level %logger - %msg%n</pattern>
 		</encoder>
 	</appender>
+	
+	<appender name="FILE-AUDIT"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/var/log/boser/boser.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss,sss} [%t] %-5level [%logger] %msg%n</pattern>
+		</encoder>
+ 
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- rollover daily -->
+			<fileNamePattern>/tmp/logs/boser.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>4MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+ 
+	</appender>
 
 
 	<logger name="org.hibernate" level="info"/>
@@ -22,6 +40,7 @@
 
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE-AUDIT" />
 	</root>
 
 </configuration>

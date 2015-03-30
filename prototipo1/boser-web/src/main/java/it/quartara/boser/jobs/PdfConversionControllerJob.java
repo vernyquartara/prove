@@ -44,11 +44,13 @@ public class PdfConversionControllerJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		log.debug("avvio transazione");
+		String jobGroup = context.getJobDetail().getKey().getGroup();
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
 		AsyncRequest request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
 		Map<String, String> params = request.getParameters();
 		short countCompleted = 0, countFailed = 0;
+		log.debug("controllo stato per il gruppo: {}", jobGroup);
 		for (Entry<String, String> param : params.entrySet()) {
 			/*
 			 * TODO si potrebbe controllare anche il gruppo e parametrizzare le stringhe
@@ -69,7 +71,7 @@ public class PdfConversionControllerJob implements Job {
 				}
 			}
 		}
-		log.debug("all jobs completed");
+		log.debug("tutti i job del gruppo hanno completato");
 		/*
 		 * se si arriva qui tutti i job hanno stato COMPLETED oppure ERROR
 		 * si può aggiornare lo stato della richiesta e quindi anche della conversione
@@ -96,6 +98,8 @@ public class PdfConversionControllerJob implements Job {
 		conversion.setCountFailed(countFailed);
 		conversion.setFilePath(zipFile.getAbsolutePath());
 		conversion.setFileSize(zipFile.length());
+		log.debug("aggiornamento pdfConversion id={}, stato={}, completati={}, errori={}",
+				pdfConversionId, conversion.getState(), countCompleted, countFailed);
 		em.merge(conversion);
 		log.debug("committing transaction");
 		em.getTransaction().commit();
@@ -116,6 +120,7 @@ public class PdfConversionControllerJob implements Job {
 				+ "/" + dirToZip.substring(dirToZip.lastIndexOf("/") + 1)
 				+ ".zip";
 		File zipFile = new File(zipFileName);
+		log.debug("avvio creazione file zip: {}", zipFile.getAbsolutePath());
 
 		FileOutputStream fos = new FileOutputStream(zipFile);
 		ZipOutputStream zos = new ZipOutputStream(fos);
@@ -129,6 +134,7 @@ public class PdfConversionControllerJob implements Job {
 			}
 		});
 		for (File file : files) {
+			log.debug("aggiunta file: {}", file.getName());
 			ZipEntry ze = new ZipEntry(file.getName());
 			zos.putNextEntry(ze);
 			FileInputStream inputFile = new FileInputStream(file);
@@ -140,6 +146,7 @@ public class PdfConversionControllerJob implements Job {
 			zos.closeEntry();
 		}
 		zos.close();
+		log.debug("file zip creato");
 		return zipFile;
 	}
 

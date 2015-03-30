@@ -29,6 +29,7 @@ conversioni effettuate
 <table border="1">
 	<thead>
 	<tr>
+		<th>ID</th>
 		<th>Nome</th>
 		<th>Data creazione</th>
 		<th>Stato</th>
@@ -40,6 +41,7 @@ conversioni effettuate
 	<tbody>
 <c:forEach items="${convertions}" var="conv">
 	<tr>
+		<td><c:out value="${conv.id}"/></td>
 		<td>
 			<a href='<c:url value="/conversionDownload">
 					<c:param name="conversionId" value="${conv.id}"/>
