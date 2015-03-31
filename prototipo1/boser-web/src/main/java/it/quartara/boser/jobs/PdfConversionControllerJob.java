@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
@@ -19,6 +20,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -40,6 +53,8 @@ public class PdfConversionControllerJob implements Job {
 	private Long requestId;
 	private Long pdfConversionId;
 	private String destDir;
+	private String originalXlsFilePath;
+	private String originalXlsFileName;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -74,6 +89,19 @@ public class PdfConversionControllerJob implements Job {
 		log.debug("tutti i job del gruppo hanno completato");
 		/*
 		 * se si arriva qui tutti i job hanno stato COMPLETED oppure ERROR
+		 * creo una copia del xls originale, all'interno indico quali sono
+		 * andati in errore, lo includo nello zip
+		 */
+		try {
+			createXlsReport(params);
+		} catch (IOException | InvalidFormatException e) {
+			log.error("errore di elaborazione del report xls", e);
+			em.getTransaction().rollback();
+			em.close();
+			return;
+		}
+		
+		/*
 		 * si può aggiornare lo stato della richiesta e quindi anche della conversione
 		 * e creare il file zip
 		 */
@@ -113,6 +141,55 @@ public class PdfConversionControllerJob implements Job {
 		} catch (SchedulerException e) {
 			throw new JobExecutionException(e);
 		}
+	}
+	
+	private void createXlsReport(Map<String, String> params) throws IOException, InvalidFormatException {
+		Map<String, ExecutionState> urlStateMap = getUrlStateMap(params);
+		File originalXlsFile = new File(originalXlsFilePath);
+		FileUtils.copyFileToDirectory(originalXlsFile, new File(destDir));
+		File xlsReport = new File(destDir, originalXlsFileName);
+		FileInputStream in = new FileInputStream(xlsReport);
+		Workbook wb = WorkbookFactory.create(in);
+		Sheet sheet = wb.getSheetAt(0);
+		Font defaultFont = wb.createFont();
+	    defaultFont.setFontHeightInPoints((short)8);
+	    defaultFont.setFontName("Arial");
+		CellStyle cellStyle = wb.createCellStyle();
+		cellStyle.setFont(defaultFont);
+		cellStyle.setFillForegroundColor(HSSFColor.RED.index);
+		cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+		cellStyle.setBorderBottom(CellStyle.BORDER_THIN);
+		cellStyle.setBorderLeft(CellStyle.BORDER_THIN);
+		cellStyle.setBorderTop(CellStyle.BORDER_THIN);
+		cellStyle.setBorderRight(CellStyle.BORDER_THIN);
+		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+		for (Row row : sheet) {
+			Cell cell = row.getCell(0);
+			Hyperlink link = cell.getHyperlink();
+			if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
+				cell.setCellStyle(cellStyle);
+			}
+		}
+		in.close();
+		FileOutputStream out = new FileOutputStream(xlsReport);
+		wb.write(out);
+		out.close();
+		wb.close();
+	}
+	
+	private Map<String, ExecutionState> getUrlStateMap(Map<String, String> params) {
+		Map<String, ExecutionState> urlStateMap = new HashMap<String, ExecutionState>();
+		for (Entry<String, String> param : params.entrySet()) {
+			String paramKey = param.getKey();
+			if (paramKey.contains("state")) {
+				String jobKey = paramKey.substring(0, paramKey.indexOf(".state"));
+				String url = params.get(jobKey+".url");
+				ExecutionState state = ExecutionState.valueOf(param.getValue());
+				urlStateMap.put(url, state);
+			}
+		}
+		return urlStateMap;
 	}
 
 	private File createZipFile(String dirToZip) throws IOException {
@@ -164,6 +241,14 @@ public class PdfConversionControllerJob implements Job {
 	
 	public void setEntityManagerFactory(EntityManagerFactory emf) {
 		this.emf = emf;
+	}
+	
+	public void setOriginalXlsFilePath(String originalXlsFilePath) {
+		this.originalXlsFilePath = originalXlsFilePath;
+	}
+	
+	public void setOriginalXlsFileName(String originalXlsFileName) {
+		this.originalXlsFileName = originalXlsFileName;
 	}
 
 }

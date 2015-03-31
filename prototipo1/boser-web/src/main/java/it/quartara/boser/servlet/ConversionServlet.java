@@ -178,6 +178,7 @@ public class ConversionServlet extends BoserServlet {
 				Integer jobId = url.hashCode();
 				JobDetail jobDetail = createJob(PdfConversionJob.class, "job"+jobId.toString(), groupId.toString(), jobDataMap);
 				asyncRequestParams.put(jobDetail.getKey().toString()+".state", ExecutionState.STARTED.toString());
+				asyncRequestParams.put(jobDetail.getKey().toString()+".url", url);
 				Trigger trigger = createTrigger("trg"+jobId.toString(), groupId.toString());
 				try {
 					scheduler.scheduleJob(jobDetail, trigger);
@@ -198,6 +199,8 @@ public class ConversionServlet extends BoserServlet {
 		jobDataMap.put("requestId", asyncRequest.getId());
 		jobDataMap.put("pdfConversionId", pdfConversion.getId());
 		jobDataMap.put("destDir", destDir);
+		jobDataMap.put("originalXlsFilePath", xlsFile.getAbsolutePath());
+		jobDataMap.put("originalXlsFileName", originalName);
 		JobDetail jobDetail = createJob(PdfConversionControllerJob.class, "ctrl", groupId.toString(), jobDataMap);
 		Trigger trigger = createControllerTrigger("ctrlTrg", groupId.toString());
 		try {
