@@ -109,11 +109,18 @@ public class ConversionServlet extends BoserServlet {
 		em.getTransaction().begin();
 		Parameter param = em.find(Parameter.class, "SEARCH_REPO");
 		String repo = param.getValue();
+		log.debug("SEARCH_REPO: {}", repo);
+		if (param.getValue().startsWith("$")) {
+			repo = System.getenv(param.getValue().substring(1));
+			log.debug("converting variable {} into {}",  param.getValue().substring(1), repo);
+		}
 		String pdfRepo = repo+"/"+crawlerId+"/pdfs";
+		log.debug("pdf repo: {}", pdfRepo);
 		new File(pdfRepo).mkdirs();
 		File xlsFile = new File(pdfRepo+"/"+originalName);
 		try {
 			uploadedFile.write(xlsFile);
+			log.debug("written xls file: {}", xlsFile.getAbsolutePath());
 		} catch (Exception e) {
 			em.getTransaction().rollback();
 			em.close();
@@ -139,6 +146,7 @@ public class ConversionServlet extends BoserServlet {
 		 * a partire dal file xls
 		 */
 		String destDir = pdfRepo+"/"+originalName.substring(0, originalName.lastIndexOf("."));
+		log.debug("dest dir: {}", destDir);
 		new File(destDir).mkdirs();
 		Workbook wb = null;
 		try {

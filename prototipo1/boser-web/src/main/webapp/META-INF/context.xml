@@ -3,3 +3,16 @@
             driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/boser-jpa"
             username="boser" password="boser" maxActive="20" maxIdle="10" maxWait="-1" />
 </Context> 
+
+<!--
+per il mysql remoto:
+
+Server: 127.5.242.130:3306
+
+
+Please make note of these MySQL credentials again:
+  Root User: adminfKSy3TZ
+  Root Password: XKNl-lrXpYCq
+URL: https://collaudo-boser.rhcloud.com/phpmyadmin/
+ 
+ -->
