@@ -3,7 +3,7 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss,sss} %-5level %logger - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS, Europe/Rome} %-5level %logger - %msg%n</pattern>
 		</encoder>
 	</appender>
 	
@@ -11,7 +11,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>/var/log/boser/boser.log</file>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-			<pattern>%d{HH:mm:ss,sss} [%t] %-5level [%logger] %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS, Europe/Rome} [%t] %-5level [%logger] %msg%n</pattern>
 		</encoder>
  
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
