@@ -170,30 +170,32 @@ public class ConversionServlet extends BoserServlet {
 		}
 		PdfConversionService service = PdfConversionFactory.create();
 		for (Row row : sheet) {
-			Cell cell = row.getCell(0);
-			Hyperlink link = cell.getHyperlink();
-			if (link != null) {
-				String url = link.getAddress();
-				String testata = cell.getRichStringCellValue().getString();
-				log.debug("crezione job per url={}, testata={}", url, testata);
-				JobDataMap jobDataMap = new JobDataMap();
-				jobDataMap.put("url", url);
-				jobDataMap.put("destDir", destDir);
-				jobDataMap.put("pdfFileNamePrefix", testata);
-				jobDataMap.put("requestId", asyncRequest.getId());
-				jobDataMap.put("entityManagerFactory", emf);
-				jobDataMap.put("service", service);
-				Integer jobId = url.hashCode();
-				JobDetail jobDetail = createJob(PdfConversionJob.class, "job"+jobId.toString(), groupId.toString(), jobDataMap);
-				asyncRequestParams.put(jobDetail.getKey().toString()+".state", ExecutionState.STARTED.toString());
-				asyncRequestParams.put(jobDetail.getKey().toString()+".url", url);
-				Trigger trigger = createTrigger("trg"+jobId.toString(), groupId.toString());
-				try {
-					scheduler.scheduleJob(jobDetail, trigger);
-				} catch (SchedulerException e) {
-					em.getTransaction().rollback();
-					em.close();
-					throw new ServletException("Errore di schedulazione del job", e);
+			if (row.getPhysicalNumberOfCells()>0) {
+				Cell cell = row.getCell(0);
+				Hyperlink link = cell.getHyperlink();
+				if (link != null) {
+					String url = link.getAddress();
+					String testata = cell.getRichStringCellValue().getString();
+					log.debug("crezione job per url={}, testata={}", url, testata);
+					JobDataMap jobDataMap = new JobDataMap();
+					jobDataMap.put("url", url);
+					jobDataMap.put("destDir", destDir);
+					jobDataMap.put("pdfFileNamePrefix", testata);
+					jobDataMap.put("requestId", asyncRequest.getId());
+					jobDataMap.put("entityManagerFactory", emf);
+					jobDataMap.put("service", service);
+					Integer jobId = url.hashCode();
+					JobDetail jobDetail = createJob(PdfConversionJob.class, "job"+jobId.toString(), groupId.toString(), jobDataMap);
+					asyncRequestParams.put(jobDetail.getKey().toString()+".state", ExecutionState.STARTED.toString());
+					asyncRequestParams.put(jobDetail.getKey().toString()+".url", url);
+					Trigger trigger = createTrigger("trg"+jobId.toString(), groupId.toString());
+					try {
+						scheduler.scheduleJob(jobDetail, trigger);
+					} catch (SchedulerException e) {
+						em.getTransaction().rollback();
+						em.close();
+						throw new ServletException("Errore di schedulazione del job", e);
+					}
 				}
 			}
 		}

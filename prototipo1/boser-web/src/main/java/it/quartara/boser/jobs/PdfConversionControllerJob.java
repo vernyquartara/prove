@@ -165,10 +165,12 @@ public class PdfConversionControllerJob implements Job {
 		cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		cellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		for (Row row : sheet) {
-			Cell cell = row.getCell(0);
-			Hyperlink link = cell.getHyperlink();
-			if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
-				cell.setCellStyle(cellStyle);
+			if (row.getPhysicalNumberOfCells()>0) {
+				Cell cell = row.getCell(0);
+				Hyperlink link = cell.getHyperlink();
+				if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
+					cell.setCellStyle(cellStyle);
+				}
 			}
 		}
 		in.close();

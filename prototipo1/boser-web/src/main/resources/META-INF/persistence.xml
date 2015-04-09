@@ -16,6 +16,7 @@
       <property name="hibernate.hbm2ddl.auto" value="update" />
       <property name="hibernate.cache.use_second_level_cache" value="false"/>
       <property name="hibernate.bytecode.provider" value="cglib" />
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLInnoDBDialect" />
     </properties>
   </persistence-unit>
 

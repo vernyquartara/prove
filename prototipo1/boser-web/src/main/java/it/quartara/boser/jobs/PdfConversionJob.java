@@ -10,10 +10,17 @@ import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.LockModeType;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.RollbackException;
+import javax.servlet.ServletException;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +60,15 @@ public class PdfConversionJob implements Job {
 		request.setLastUpdate(new Date());
 		
 		log.debug("aggiornamento stato={} per il job {}", state, jobKey);
-		em.getTransaction().commit();
-		em.close();
+		try {
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			log.warn("problema di commit della transazione, "
+					+ "il job {} viene rischedulato per l'esecuzione", jobKey);
+			throw new JobExecutionException(e, Boolean.TRUE);
+		} finally {
+			em.close();
+		}
 	}
 
 	public void setUrl(String url) {
