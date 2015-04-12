@@ -209,7 +209,8 @@ public class PdfConversionControllerJob implements Job {
 
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".pdf");
+				return name.toLowerCase().endsWith(".pdf")
+						|| name.toLowerCase().endsWith(".xls");
 			}
 		});
 		for (File file : files) {
