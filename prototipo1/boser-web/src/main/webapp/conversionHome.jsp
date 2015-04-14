@@ -11,10 +11,13 @@
     function showCredits() {
         alert('Verny Quartara 2015');
     }
+    function AutoRefresh( t ) {
+    	setTimeout("location.reload(true);", t);
+    }
 </script>
 </head>
 
-<body>
+<body onload="JavaScript:AutoRefresh(7000);">
 
 <div>carica un foglio Excel, Boser creerà un PDF per ogni articolo</div>
 <div>(la conversione può durare fino a due minuti per ogni articolo)</div>
