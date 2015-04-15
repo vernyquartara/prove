@@ -1,6 +1,5 @@
 package it.quartara.boser.listener;
 
-import it.quartara.boser.jobs.PdfConversionControllerJob;
 import it.quartara.boser.model.ExecutionState;
 import it.quartara.boser.model.PdfConversion;
 
@@ -46,6 +45,7 @@ public class EntityManagerListener implements ServletContextListener {
          * le conversioni in stato STARTED vanno messe a ERROR
          */
         EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
         log.debug("controllo conversioni pdf non terminate");
 		TypedQuery<PdfConversion> query = em.createQuery("from PdfConversion where state='STARTED'", PdfConversion.class);
 		List<PdfConversion> pdfConversions = query.getResultList();
@@ -54,7 +54,7 @@ public class EntityManagerListener implements ServletContextListener {
 			pdfConversion.setState(ExecutionState.ERROR);
 			em.merge(pdfConversion);
 		}
-		em.flush();
+		em.getTransaction().commit();
 		em.close();
         emf.close();
     }
