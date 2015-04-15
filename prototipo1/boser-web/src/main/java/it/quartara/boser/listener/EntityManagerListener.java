@@ -31,6 +31,7 @@ public class EntityManagerListener implements ServletContextListener {
         EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("BoserPU");
         e.getServletContext().setAttribute("emf", emf);
+        aggiornaStatoConversioniNonTerminate(emf);
     }
  
 	/* Release the EntityManagerFactory
@@ -41,7 +42,12 @@ public class EntityManagerListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent e) {
         EntityManagerFactory emf =
             (EntityManagerFactory)e.getServletContext().getAttribute("emf");
-        /*
+        aggiornaStatoConversioniNonTerminate(emf);
+        emf.close();
+    }
+	
+	private void aggiornaStatoConversioniNonTerminate(EntityManagerFactory emf) {
+		/*
          * le conversioni in stato STARTED vanno messe a ERROR
          */
         EntityManager em = emf.createEntityManager();
@@ -56,7 +62,6 @@ public class EntityManagerListener implements ServletContextListener {
 		}
 		em.getTransaction().commit();
 		em.close();
-        emf.close();
-    }
+	}
 
 }
