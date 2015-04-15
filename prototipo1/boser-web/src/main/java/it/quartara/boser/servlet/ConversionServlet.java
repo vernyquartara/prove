@@ -96,6 +96,8 @@ public class ConversionServlet extends BoserServlet {
 			originalName = originalName.substring(originalName.lastIndexOf("\\")+1);
 		}
 		log.debug("nome file xls uploadato: {}", originalName);
+		originalName = originalName.replaceAll("\\s", "");
+		log.debug("con rimozione spazi: {}", originalName);
 		/*
 		 * avvio transazione
 		 * recupero parametri (cartelle di lavoro)
@@ -127,14 +129,9 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("problemi di scrittura file xls", e);
 		}
 		/*
-		 * creazione oggetto PdfConversion e AsyncRequest
+		 * creazione oggetto AsyncRequest
 		 */
 		Date now = new Date();
-		PdfConversion pdfConversion = new PdfConversion();
-		pdfConversion.setState(ExecutionState.STARTED);
-		pdfConversion.setStartDate(now);
-		em.persist(pdfConversion);
-		log.debug("creato nuovo oggetto PdfConversion id={}", pdfConversion.getId());
 		AsyncRequest asyncRequest = new AsyncRequest();
 		asyncRequest.setState(ExecutionState.STARTED);
 		asyncRequest.setCreationDate(now);
@@ -169,11 +166,13 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("Errore di creazione dello scheduler", e);
 		}
 		PdfConversionService service = PdfConversionFactory.create();
+		short countTotal = 0;
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
 				Cell cell = row.getCell(0);
 				Hyperlink link = cell.getHyperlink();
 				if (link != null) {
+					countTotal++;
 					String url = link.getAddress();
 					String testata = cell.getRichStringCellValue().getString();
 					log.debug("crezione job per url={}, testata={}", url, testata);
@@ -201,6 +200,16 @@ public class ConversionServlet extends BoserServlet {
 		}
 		asyncRequest.setParameters(asyncRequestParams);
 		em.merge(asyncRequest);
+		/*
+		 * creazione oggetto PdfConversion
+		 */
+		PdfConversion pdfConversion = new PdfConversion();
+		pdfConversion.setState(ExecutionState.STARTED);
+		pdfConversion.setStartDate(now);
+		pdfConversion.setAsyncRequest(asyncRequest);
+		pdfConversion.setCountTotal(countTotal);
+		em.persist(pdfConversion);
+		log.debug("creato nuovo oggetto PdfConversion id={}", pdfConversion.getId());
 		/*
 		 * creazione e schedulazione del job controller
 		 */

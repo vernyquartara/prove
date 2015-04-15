@@ -11,13 +11,10 @@
     function showCredits() {
         alert('Verny Quartara 2015');
     }
-    function AutoRefresh( t ) {
-    	setTimeout("location.reload(true);", t);
-    }
 </script>
 </head>
 
-<body onload="JavaScript:AutoRefresh(7000);">
+<body>
 
 <div>carica un foglio Excel, Boser creerà un PDF per ogni articolo</div>
 <div>(la conversione può durare fino a due minuti per ogni articolo)</div>
@@ -28,40 +25,63 @@
 </form>
 <hr/>
 <div>
-conversioni effettuate
+<strong>conversioni effettuate: ricarica la pagina (F5) per aggiornare i dati</strong>
 <table border="1">
 	<thead>
 	<tr>
 		<th>ID</th>
 		<th>Nome</th>
-		<th>Data creazione</th>
+		<th>Avviato il</th>
 		<th>Stato</th>
-		<th>N° pdf OK</th>
-		<th>N° pdf KO</th>
-		<th>Dimensione zip (KB)</th>
+		<th>tot. articoli</th>
+		<th>in lavorazione</th>
+		<th>ult. agg.</th>
+		<th>pdf OK</th>
+		<th>pdf KO</th>
+		<th>KB zip</th>
 	</tr>
 	</thead>
 	<tbody>
-<c:forEach items="${convertions}" var="conv">
-	<tr>
-		<td><c:out value="${conv.id}"/></td>
-		<td>
-			<a href='<c:url value="/conversionDownload">
-					<c:param name="conversionId" value="${conv.id}"/>
-				</c:url>
-					'>
-				<c:out value="${conv.label}"/>
-			</a>
-		</td>
-		<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-		<td><c:out value="${conv.state}"/></td>
-		<td><c:out value="${conv.countCompleted}"/></td>
-		<td><c:out value="${conv.countFailed}"/></td>
-		<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
-	</tr>
-</c:forEach>
+	<c:forEach items="${convertions}" var="conv">
+		<tr>
+			<td><c:out value="${conv.id}"/></td>
+			<td>
+				<a href='<c:url value="/conversionDownload">
+						<c:param name="conversionId" value="${conv.id}"/>
+					</c:url>
+						'>
+					<c:out value="${conv.label}"/>
+				</a>
+			</td>
+			<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+			<td><c:out value="${conv.state}"/></td>
+			<td><c:out value="${conv.countTotal}"/></td>
+			<td><c:out value="${conv.countWorking}"/></td>
+			<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
+			<td><c:out value="${conv.countCompleted}"/></td>
+			<td><c:out value="${conv.countFailed}"/></td>
+			<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
+		</tr>
+	</c:forEach>
 	</tbody>
 </table>
+</div>
+
+<div>
+
+<ol>
+<li>ID: codice identificativo</li>
+<li>Nome: nome del file</li>
+<li>Avviato il: data di inserimento della richiesta di lavorazione</li>
+<li>Stato: lo stato della lavorazione</li>
+<li>tot. articoli: numero totale di articoli trovati nel foglio Excel di input</li>
+<li>in lavorazione: numero di articoli attualmente in elaborazione</li>
+<li>ult. agg.: orario ultimo articolo elaborato</li>
+<li>pdf OK: numero di pdf creati correttamente</li>
+<li>pdf KO: numero di pdf non creati a causa di errori</li>
+<li>KB zip: dimensione in kilobyte del file zip</li>
+</ol>
+NB: il numero dei pdf OK e KO viene calcolato solo al termine della lavorazione
 </div>
 
 </body>
