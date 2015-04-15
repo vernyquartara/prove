@@ -17,7 +17,7 @@
 </script>
 </head>
 
-<body onload="JavaScript:AutoRefresh(7000);">
+<body onload="JavaScript:AutoRefresh(10000);">
 
 <div>carica un foglio Excel, Boser creerà un PDF per ogni articolo</div>
 <div>(la conversione può durare fino a due minuti per ogni articolo)</div>
