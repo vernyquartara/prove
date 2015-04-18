@@ -4,6 +4,7 @@ import it.quartara.boser.helper.UrlHelper;
 import it.quartara.boser.service.PdfConversionService;
 
 import java.awt.Color;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11,6 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -54,6 +58,7 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 		try {
 			ImageRenderer imageRenderer = new ImageRenderer();
 			Transcoder transcoder = new PDFTranscoder();
+
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			//File tempFile = File.createTempFile("svg", null);
 			//tempFile.deleteOnExit();
@@ -62,13 +67,17 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 			imageRenderer.renderURL(url, outputStream, ImageRenderer.Type.SVG);
 			log.debug("fine rendering SVG");
 			byte[] svgBytes = outputStream.toByteArray();
+			
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(svgBytes);
 			//FileInputStream inputStream = new FileInputStream(tempFile);
 			TranscoderInput transcoderInput = new TranscoderInput(inputStream);
-	        TranscoderOutput transcoderOutput = new TranscoderOutput(new FileOutputStream(destFile));
+	        TranscoderOutput transcoderOutput 
+	        	= new TranscoderOutput(new BufferedOutputStream(new FileOutputStream(destFile)));
 	        log.debug("conversione in pdf...");
 			transcoder.transcode(transcoderInput, transcoderOutput);
 			log.debug("conversione in pdf effettuata correttamente");
+			outputStream.close();
+			inputStream.close();
 		} catch (Exception e) {
 			log.error("problema di conversione in pdf per l'url: "+url, e);
 			return null;
@@ -76,10 +85,17 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 		return destFile;
 	}
 	
+	public static void main(String ... args) {
+		PdfConversionServiceImpl service = new PdfConversionServiceImpl();
+		File pdfFile = service.convertToPdf("/home/webny/work/Boser/test/pdf", 
+				"http://www.allaguida.it/articolo/mercedes-s600-pullman-maybach-prezzo-dimensioni-interni-e-scheda-tecnica-foto/84387/", 
+				"allaguida.it");
+	}
+	
 	/*
 	 * for debug purpose
 	 */
-	public static void main(String[] a) throws IOException, DocumentException {
+	public static void mainssss(String[] a) throws IOException, DocumentException {
 		PdfConversionServiceImpl service = new PdfConversionServiceImpl();
 		File pdfFile = service.convertToPdf("/home/webny/work/Boser/test/pdf", "http://www.riders.org/get-involved/motorcycling-events", "riders.org");
 		PdfReader reader = new PdfReader(pdfFile.getAbsolutePath());
