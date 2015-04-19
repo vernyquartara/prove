@@ -105,6 +105,13 @@ public class PdfConversionJob implements Job {
 			}
 			em.getTransaction().commit();
 			throw new JobExecutionException(ofme);
+		} catch (Exception e) {
+			/*
+			 * generic exception other than OutOfMemoryError
+			 * dovrebbe essere un errore estemporaneo, si riprova
+			 */
+			log.error("rilevata eccezione non prevista");
+			throw new JobExecutionException(e, Boolean.TRUE);
 		} finally {
 			em.close();
 		}
