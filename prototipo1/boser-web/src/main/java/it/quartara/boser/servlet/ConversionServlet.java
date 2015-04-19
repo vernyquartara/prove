@@ -231,16 +231,6 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("Errore di schedulazione del job controller", e);
 		}
 		/*
-		 * avvio schedulazione jobs
-		 */
-		try {
-			scheduler.startDelayed(5);
-		} catch (SchedulerException e) {
-			em.getTransaction().rollback();
-			em.close();
-			throw new ServletException("Errore di avvio dello scheduler", e);
-		}
-		/*
 		 * chiusura transazione
 		 */
 		log.debug("chiusura transazione");

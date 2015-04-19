@@ -32,6 +32,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author webny
  *
  */
+@DisallowConcurrentExecution
 public class PdfConversionControllerJob implements Job {
 	
 	private static final Logger log = LoggerFactory.getLogger(PdfConversionControllerJob.class);
