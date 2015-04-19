@@ -93,9 +93,8 @@ public class PdfConversionJob implements Job {
 				request.setLastUpdate(now);
 			}
 			em.getTransaction().commit();
-			throw new JobExecutionException(ofme);
-		} finally {
 			em.close();
+			throw new JobExecutionException(ofme);
 		}
 		
 		/*
