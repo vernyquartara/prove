@@ -8,6 +8,8 @@ import it.quartara.boser.service.PdfConversionService;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -48,35 +50,22 @@ public class PdfConversionJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		String jobKey = context.getJobDetail().getKey().toString();
 		EntityManager em = emf.createEntityManager();
+		/*
+		 * conversione
+		 */
+		File pdfFile = null;
 		try {
 			log.debug("avvio conversione in pdf, job: {}", jobKey);
-			File pdfFile = service.convertToPdf(destDir, url, pdfFileNamePrefix);
-			
-			em.getTransaction().begin();
-			AsyncRequest request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-			ExecutionState state = ExecutionState.COMPLETED;
-			if (pdfFile == null) {
-				state = ExecutionState.ERROR;
-			}
-			request.getParameters().put(jobKey+".state", state.toString());
-			request.setLastUpdate(new Date());
-			
-			log.debug("aggiornamento stato={} per il job {}", state, jobKey);
-			try {
-				em.getTransaction().commit();
-			} catch (Exception e) {
-				/*
-				 * di solito si tratta di un problema di optimistick lock.
-				 */
-				log.warn("problema di commit della transazione, "
-						+ "il job {} viene rischedulato per l'esecuzione", jobKey);
-				throw new JobExecutionException(e, Boolean.TRUE);
-			}
+			pdfFile = service.convertToPdf(destDir, url, pdfFileNamePrefix);
 		} catch (OutOfMemoryError ofme) {
 			log.error ("OutOfMemoryError sul job {}", jobKey);
 			Date now = new Date();
 			em.getTransaction().begin();
 			AsyncRequest request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+			if (request == null) {
+				/* come può accadere? */
+				log.error("il find della richiesta asincrona {} ha restituito null!!", requestId);
+			}
 			if ( now.before(DateUtils.addSeconds(request.getCreationDate(), 120))) {
 				/*
 				 * se non sono ancora passati due minuti dalla creazione della richiesta
@@ -105,12 +94,40 @@ public class PdfConversionJob implements Job {
 			}
 			em.getTransaction().commit();
 			throw new JobExecutionException(ofme);
+		} finally {
+			em.close();
+		}
+		
+		/*
+		 * aggiornamento request
+		 */
+		em.getTransaction().begin();
+		AsyncRequest request = null;
+		try {
+			request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+			if (request == null) {
+				/* come può accadere? */
+				log.error("il find della richiesta asincrona {} ha restituito null!!", requestId);
+			}
+			ExecutionState state = ExecutionState.COMPLETED;
+			if (pdfFile == null) {
+				state = ExecutionState.ERROR;
+			}
+			Map<String, String> parameters = request.getParameters();
+			if (parameters == null) {
+				parameters = new HashMap<String, String>();
+			}
+			parameters.put(jobKey+".state", state.toString());
+			request.setLastUpdate(new Date());
+			log.debug("aggiornamento stato={} per il job {}", state, jobKey);
+			em.getTransaction().commit();
 		} catch (Exception e) {
 			/*
-			 * generic exception other than OutOfMemoryError
-			 * dovrebbe essere un errore estemporaneo, si riprova
+			 * di solito si tratta di un problema di optimistick lock.
+			 * si riesegue il job.
 			 */
-			log.error("rilevata eccezione non prevista");
+			log.warn("problema di commit della transazione, "
+					+ "il job {} viene rischedulato per l'esecuzione", jobKey);
 			throw new JobExecutionException(e, Boolean.TRUE);
 		} finally {
 			em.close();
