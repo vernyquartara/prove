@@ -16,7 +16,7 @@
  
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- rollover daily -->
-			<fileNamePattern>/tmp/logs/boser.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<fileNamePattern>/tmp/logs/boser.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<maxFileSize>4MB</maxFileSize>

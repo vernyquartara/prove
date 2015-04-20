@@ -1,7 +1,12 @@
 <Context reloadable="false">
   <Resource name="jdbc/BoserDS" auth="Container" type="javax.sql.DataSource"
             driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${DB_URL}:3306/${DB_NAME}"
-            username="boser" password="boser" maxActive="20" maxIdle="10" maxWait="-1" />
+            username="boser" password="boser" maxActive="20" maxIdle="10" maxWait="10000" 
+            removeAbandoned="true" logAbandoned="true" validationQuery="/* ping */ SELECT 1"/>
+  <Resource name="jdbc/QuartzDS" auth="Container" type="javax.sql.DataSource"
+            driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${DB_URL}:3306/quartz"
+            username="quartz" password="quartz" maxActive="20" maxIdle="10" maxWait="10000" 
+            removeAbandoned="true" logAbandoned="true" validationQuery="/* ping */ SELECT 1"/>
 </Context> 
 
 <!--
