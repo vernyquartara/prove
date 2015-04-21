@@ -88,8 +88,8 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 	public static void main(String ... args) {
 		PdfConversionServiceImpl service = new PdfConversionServiceImpl();
 		File pdfFile = service.convertToPdf("/home/webny/work/Boser/test/pdf", 
-				"http://www.allaguida.it/articolo/mercedes-s600-pullman-maybach-prezzo-dimensioni-interni-e-scheda-tecnica-foto/84387/", 
-				"allaguida.it");
+				"http://www.gazzetta.it/Passione-Motori/Auto/10-04-2015/nuova-kia-rio-clima-navigatore-telecamera-motori-110408679133.shtml", 
+				"gazzetta.it");
 	}
 	
 	/*

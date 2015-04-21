@@ -21,7 +21,7 @@ public class ConversionHomeServlet extends BoserServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		EntityManager em = getEntityManager();
-		List<PdfConversion> convertions = em.createQuery("from PdfConversion", PdfConversion.class).getResultList();
+		List<PdfConversion> convertions = em.createQuery("from PdfConversion order by id desc", PdfConversion.class).getResultList();
 		request.setAttribute("convertions", convertions);
 		RequestDispatcher rd = request.getRequestDispatcher("/conversionHome.jsp");
 		rd.forward(request, response);
