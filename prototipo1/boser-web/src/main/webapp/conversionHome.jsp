@@ -6,6 +6,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>TEST</title>
+<link rel="stylesheet" href="css/boser.css"/>
 <meta name="author" content="Verny Quartara"/>
 <script type="text/javascript" language="Javascript">
     function showCredits() {
@@ -16,72 +17,74 @@
 
 <body>
 
-<div>carica un foglio Excel, Boser creerà un PDF per ogni articolo</div>
-<div>(la conversione può durare fino a due minuti per ogni articolo)</div>
-<form action="/xlsToPdf" method="post" enctype="multipart/form-data">
-	<input type="file" name="file" size="50" />
-	<input type="hidden" name="crawlerId" value="1" />
-	<input type="submit" value="Upload File" />
-</form>
-<hr/>
-<div>
-<strong>conversioni effettuate: ricarica la pagina (F5) per aggiornare i dati</strong>
-<table border="1">
-	<thead>
-	<tr>
-		<th>ID</th>
-		<th>Nome</th>
-		<th>Avviato il</th>
-		<th>Stato</th>
-		<th>tot. articoli</th>
-		<th>in lavorazione</th>
-		<th>ult. agg.</th>
-		<th>pdf OK</th>
-		<th>pdf KO</th>
-		<th>KB zip</th>
-	</tr>
-	</thead>
-	<tbody>
-	<c:forEach items="${convertions}" var="conv">
-		<tr>
-			<td><c:out value="${conv.id}"/></td>
-			<td>
-				<a href='<c:url value="/conversionDownload">
-						<c:param name="conversionId" value="${conv.id}"/>
-					</c:url>
-						'>
-					<c:out value="${conv.label}"/>
-				</a>
-			</td>
-			<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-			<td><c:out value="${conv.state}"/></td>
-			<td><c:out value="${conv.countTotal}"/></td>
-			<td><c:out value="${conv.countWorking}"/></td>
-			<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
-			<td><c:out value="${conv.countCompleted}"/></td>
-			<td><c:out value="${conv.countFailed}"/></td>
-			<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
-		</tr>
-	</c:forEach>
-	</tbody>
-</table>
+<div id="barra">
+	<div id="pulsanti">
+		<p class="istruzioni">carica un foglio Excel per avviare la conversione in pdf</p>
+		<form action="/xlsToPdf" method="post" enctype="multipart/form-data">
+			<input type="file" name="file" size="50" />
+			<input type="hidden" name="crawlerId" value="1" />
+			<input type="submit" value="Upload File" />
+		</form>
+	</div>
+	<div id="logo" onclick="showCredits();">boser</div>
+</div>
+<div id="tabella">
+	<p>Conversioni Effettuate  (ricarica la pagina (F5) per aggiornare i dati)</p>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Nome</th>
+				<th>Avviato il</th>
+				<th>Stato</th>
+				<th>tot. articoli</th>
+				<th>in lavorazione</th>
+				<th>ult. agg.</th>
+				<th>pdf OK</th>
+				<th>pdf KO</th>
+				<th>KB zip</th>
+			</tr>
+		</thead>
+		<tbody>
+		<c:forEach items="${convertions}" var="conv">
+			<tr>
+				<td class="conv_id"><c:out value="${conv.id}"/></td>
+				<td>
+					<a href='<c:url value="/conversionDownload">
+							<c:param name="conversionId" value="${conv.id}"/>
+						</c:url>
+							'>
+						<c:out value="${conv.label}"/>
+					</a>
+				</td>
+				<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+				<td><c:out value="${conv.state}"/></td>
+				<td><c:out value="${conv.countTotal}"/></td>
+				<td><c:out value="${conv.countWorking}"/></td>
+				<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
+				<td><c:out value="${conv.countCompleted}"/></td>
+				<td><c:out value="${conv.countFailed}"/></td>
+				<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
+			</tr>
+		</c:forEach>
+		</tbody>
+	</table>
 </div>
 
-<div>
-
-<ol>
-<li>ID: codice identificativo</li>
-<li>Nome: nome del file</li>
-<li>Avviato il: data di inserimento della richiesta di lavorazione</li>
-<li>Stato: lo stato della lavorazione</li>
-<li>tot. articoli: numero totale di articoli trovati nel foglio Excel di input</li>
-<li>in lavorazione: numero di articoli attualmente in elaborazione</li>
-<li>ult. agg.: orario ultimo articolo elaborato</li>
-<li>pdf OK: numero di pdf creati correttamente</li>
-<li>pdf KO: numero di pdf non creati a causa di errori</li>
-<li>KB zip: dimensione in kilobyte del file zip</li>
-</ol>
-NB: il numero dei pdf OK e KO viene calcolato solo al termine della lavorazione
+<div id="legenda">
+	<ol>
+		<li>ID: codice identificativo</li>
+		<li>Nome: nome del file</li>
+		<li>Avviato il: data di inserimento della richiesta di lavorazione</li>
+		<li>Stato: lo stato della lavorazione</li>
+		<li>tot. articoli: numero totale di articoli trovati nel foglio Excel di input</li>
+		<li>in lavorazione: numero di articoli attualmente in elaborazione</li>
+		<li>ult. agg.: orario ultimo articolo elaborato</li>
+		<li>pdf OK: numero di pdf creati correttamente</li>
+		<li>pdf KO: numero di pdf non creati a causa di errori</li>
+		<li>KB zip: dimensione in kilobyte del file zip</li>
+	</ol>
+	<p>NB: il numero dei pdf OK e KO viene calcolato solo al termine della lavorazione</p>
 </div>
 
 </body>
