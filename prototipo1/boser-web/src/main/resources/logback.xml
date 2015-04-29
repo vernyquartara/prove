@@ -37,6 +37,8 @@
 	<logger name="org.hibernate.hql" level="info"/>
 	<logger name="org.hibernate.engine" level="info"/>
 	<logger name="cz.vutbr" level="error"/>
+	<logger name="org.quartz.core.QuartzSchedulerThread" level="info"/>
+	<logger name="org.quartz.impl.jdbcjobstore" level="info"/>
 
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />

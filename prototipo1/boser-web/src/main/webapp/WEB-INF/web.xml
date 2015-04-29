@@ -7,7 +7,7 @@
 
 	<context-param>
 		<param-name>quartz:start-on-load</param-name>
-		<param-value>true</param-value>
+		<param-value>false</param-value>
 	</context-param>
 
 	<listener>
