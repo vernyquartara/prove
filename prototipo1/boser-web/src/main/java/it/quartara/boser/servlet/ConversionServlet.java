@@ -162,7 +162,7 @@ public class ConversionServlet extends BoserServlet {
 		Scheduler scheduler;
 		try {
 			scheduler = schedulerFactory.getScheduler();
-			scheduler.standby(); //per evitare che i job partano prima che il thread corrente abbia terminato
+			//scheduler.standby(); //per evitare che i job partano prima che il thread corrente abbia terminato
 		} catch (SchedulerException e) {
 			em.getTransaction().rollback();
 			em.close();
@@ -228,7 +228,7 @@ public class ConversionServlet extends BoserServlet {
 		try {
 			log.debug("schedulazione job controller");
 			scheduler.scheduleJob(jobDetail, trigger);
-			scheduler.start();
+			//scheduler.start();
 		} catch (SchedulerException e) {
 			em.getTransaction().rollback();
 			em.close();
@@ -260,7 +260,7 @@ public class ConversionServlet extends BoserServlet {
 	private Trigger createTrigger(String triggerId, String groupId) {
 		Trigger trigger = newTrigger()
 				.withIdentity(triggerId, groupId)
-				.startNow()
+				.startAt(futureDate(10, IntervalUnit.SECOND))
 				.build();
 		return trigger;
 	}
