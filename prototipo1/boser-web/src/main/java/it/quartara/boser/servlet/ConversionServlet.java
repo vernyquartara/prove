@@ -260,7 +260,7 @@ public class ConversionServlet extends BoserServlet {
 	private Trigger createTrigger(String triggerId, String groupId) {
 		Trigger trigger = newTrigger()
 				.withIdentity(triggerId, groupId)
-				.startAt(futureDate(5, IntervalUnit.SECOND))
+				.startNow()
 				.build();
 		return trigger;
 	}
