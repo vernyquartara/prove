@@ -255,7 +255,7 @@ public class ConversionServlet extends BoserServlet {
 							.withIntervalInSeconds(15)
 							.withMisfireHandlingInstructionNextWithRemainingCount()
 							.repeatForever())
-				.startAt(futureDate(30, IntervalUnit.SECOND))
+				.startAt(futureDate(60, IntervalUnit.SECOND))
 				.build();
 		return trigger;
 	}
@@ -264,7 +264,7 @@ public class ConversionServlet extends BoserServlet {
 		Trigger trigger = newTrigger()
 				.withIdentity(triggerId, groupId)
 				.withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
-				.startAt(futureDate(10, IntervalUnit.SECOND))
+				.startAt(futureDate(30, IntervalUnit.SECOND))
 				.build();
 		return trigger;
 	}
