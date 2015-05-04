@@ -16,7 +16,7 @@
  
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- rollover daily -->
-			<fileNamePattern>/tmp/logs/boser.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>/var/log/boser.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<maxFileSize>4MB</maxFileSize>
@@ -39,6 +39,9 @@
 	<logger name="cz.vutbr" level="error"/>
 	<logger name="org.quartz.core.QuartzSchedulerThread" level="info"/>
 	<logger name="org.quartz.impl.jdbcjobstore" level="info"/>
+	<logger name="org.fit.cssbox.layout.CSSDecoder" level="error"/>
+	<logger name="org.fit.cssbox.layout.HTMLBoxFactory" level="warn"/>
+
 
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />

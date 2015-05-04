@@ -186,7 +186,8 @@ public class ConversionServlet extends BoserServlet {
 					jobDataMap.put("requestId", asyncRequest.getId());
 					jobDataMap.put("entityManagerFactory", emf);
 					jobDataMap.put("service", service);
-					Integer jobId = url.hashCode();
+					//Integer jobId = url.hashCode();
+					Integer jobId = new Long(System.currentTimeMillis()).intValue();
 					JobDetail jobDetail = createJob(PdfConversionJob.class, "job"+jobId.toString(), groupId.toString(), jobDataMap);
 					asyncRequestParams.put(jobDetail.getKey().toString()+".state", ExecutionState.STARTED.toString());
 					asyncRequestParams.put(jobDetail.getKey().toString()+".url", url);
@@ -252,7 +253,9 @@ public class ConversionServlet extends BoserServlet {
 				.withIdentity(triggerId, groupId)
 				.withSchedule(simpleSchedule()
 							.withIntervalInSeconds(15)
+							.withMisfireHandlingInstructionNextWithRemainingCount()
 							.repeatForever())
+				.startAt(futureDate(30, IntervalUnit.SECOND))
 				.build();
 		return trigger;
 	}
@@ -260,6 +263,7 @@ public class ConversionServlet extends BoserServlet {
 	private Trigger createTrigger(String triggerId, String groupId) {
 		Trigger trigger = newTrigger()
 				.withIdentity(triggerId, groupId)
+				.withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
 				.startAt(futureDate(10, IntervalUnit.SECOND))
 				.build();
 		return trigger;
