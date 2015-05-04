@@ -8,13 +8,9 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -24,12 +20,16 @@ import org.fit.cssbox.demo.ImageRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfStamper;
+import com.lowagie.text.pdf.PdfWriter;
 
 /**
  * http://xmlgraphics.apache.org/fop/1.1/graphics.html#batik
@@ -42,6 +42,15 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 	
 	private static final long serialVersionUID = -6957321264439905450L;
 	private static final Logger log = LoggerFactory.getLogger(PdfConversionServiceImpl.class);
+	
+	private float scaleFactor = 1.0f;
+
+	public PdfConversionServiceImpl() {
+	}
+	
+	public PdfConversionServiceImpl(float scaleFactor) {
+		this.scaleFactor = scaleFactor;
+	}
 
 	@Override
 	public File convertToPdf(String destDir, String url) {
@@ -57,8 +66,11 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 		log.debug("file destinazione={}", destFile.getAbsolutePath());
 		try {
 			ImageRenderer imageRenderer = new ImageRenderer();
+			imageRenderer.setLoadImages(Boolean.TRUE, Boolean.FALSE);
 			Transcoder transcoder = new PDFTranscoder();
-
+			/*
+			 * conversione html in SVG
+			 */
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			//File tempFile = File.createTempFile("svg", null);
 			//tempFile.deleteOnExit();
@@ -67,21 +79,44 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 			imageRenderer.renderURL(url, outputStream, ImageRenderer.Type.SVG);
 			log.debug("fine rendering SVG");
 			byte[] svgBytes = outputStream.toByteArray();
-			
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(svgBytes);
+			/*
+			 * conversione SVG in PDF
+			 */
 			//FileInputStream inputStream = new FileInputStream(tempFile);
 			TranscoderInput transcoderInput = new TranscoderInput(inputStream);
+			ByteArrayOutputStream intermediatePdf = new ByteArrayOutputStream();
 	        TranscoderOutput transcoderOutput 
-	        	= new TranscoderOutput(new BufferedOutputStream(new FileOutputStream(destFile)));
+	        	= new TranscoderOutput(new BufferedOutputStream(intermediatePdf));
 	        log.debug("conversione in pdf...");
 			transcoder.transcode(transcoderInput, transcoderOutput);
 			log.debug("conversione in pdf effettuata correttamente");
+			/*
+			 * ridimensionamento PDF
+			 */
+			log.debug("ridimensionamento pdf di un fattore {} ...", scaleFactor);
+			PdfReader reader = new PdfReader(new ByteArrayInputStream(intermediatePdf.toByteArray()));
+			Rectangle originalRectangle = reader.getPageSize(1);
+		    Rectangle resizedRectagle = new Rectangle(originalRectangle.getWidth()*scaleFactor, 
+		    										  originalRectangle.getHeight()*scaleFactor);
+		    Document doc = new Document(resizedRectagle, 0, 0, 0, 0);
+		    PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(destFile));
+		    doc.open();
+		    PdfContentByte cb = writer.getDirectContent();
+		    PdfImportedPage page = writer.getImportedPage(reader, 1);
+		    cb.addTemplate(page, scaleFactor, 0, 0, scaleFactor, 1.0f, 1.0f);
+		    doc.close();
+		    log.debug("ridimensionamento effettuato correttamente");
+		    /*
+		     * chiusura streams
+		     */
 			outputStream.close();
 			inputStream.close();
 		} catch (Exception e) {
 			log.error("problema di conversione in pdf per l'url: "+url, e);
 			return null;
 		}
+		
 		return destFile;
 	}
 	

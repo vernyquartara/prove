@@ -23,6 +23,13 @@
 		<form action="/xlsToPdf" method="post" enctype="multipart/form-data">
 			<input type="file" name="file" size="50" />
 			<input type="hidden" name="crawlerId" value="1" />
+			<select name="scale" title="seleziona il fattore di ingrandimento">
+				<option value="1.0f">100%</option>
+				<option value="1.25f">125%</option>
+				<option value="1.5f">150%</option>
+				<option value="1.75f">175%</option>
+				<option value="2.0f">200%</option>
+			</select>
 			<input type="submit" value="Upload File" />
 		</form>
 	</div>

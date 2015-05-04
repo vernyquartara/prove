@@ -168,7 +168,8 @@ public class ConversionServlet extends BoserServlet {
 			em.close();
 			throw new ServletException("Errore di creazione dello scheduler", e);
 		}
-		PdfConversionService service = PdfConversionFactory.create();
+		float scaleFactor = Float.valueOf(getFormField(items, "scale").getString());
+		PdfConversionService service = PdfConversionFactory.create(scaleFactor);
 		short countTotal = 0;
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
@@ -255,7 +256,7 @@ public class ConversionServlet extends BoserServlet {
 							.withIntervalInSeconds(15)
 							.withMisfireHandlingInstructionNextWithRemainingCount()
 							.repeatForever())
-				.startAt(futureDate(60, IntervalUnit.SECOND))
+				.startAt(futureDate(120, IntervalUnit.SECOND))
 				.build();
 		return trigger;
 	}
