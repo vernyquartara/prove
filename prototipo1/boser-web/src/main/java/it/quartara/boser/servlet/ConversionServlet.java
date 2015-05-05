@@ -174,6 +174,10 @@ public class ConversionServlet extends BoserServlet {
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
 				Cell cell = row.getCell(0);
+				if (cell == null) {
+					log.warn("trovata cella nulla riga={}, skip", row.getRowNum());
+					continue;
+				}
 				Hyperlink link = cell.getHyperlink();
 				if (link != null) {
 					countTotal++;

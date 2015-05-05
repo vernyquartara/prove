@@ -169,6 +169,10 @@ public class PdfConversionControllerJob implements Job {
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
 				Cell cell = row.getCell(0);
+				if (cell == null) {
+					log.debug("trovata cella nulla riga={}, skip", row.getRowNum());
+					continue;
+				}
 				Hyperlink link = cell.getHyperlink();
 				if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
 					cell.setCellStyle(cellStyle);
