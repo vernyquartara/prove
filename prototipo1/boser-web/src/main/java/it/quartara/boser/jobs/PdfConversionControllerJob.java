@@ -10,7 +10,6 @@ import it.quartara.boser.model.Parameter;
 import it.quartara.boser.model.PdfConversion;
 import it.quartara.boser.model.PdfConversionItem;
 import it.quartara.boser.service.PdfConversionFactory;
-import it.quartara.boser.service.impl.PdfConversionMockServiceImpl;
 
 import java.io.File;
 import java.io.IOException;
