@@ -33,7 +33,7 @@ public class ConversionDowloadServletTest {
 		Long conversionId = 10L;
 		PdfConversion conversion  = new PdfConversion();
 		String filePath = "src/test/resources/searchResult.zip";
-		conversion.setFilePath(filePath);
+		conversion.setZipFilePath(filePath);
 		EntityManagerFactory emf = mock(EntityManagerFactory.class);
 		EntityManager em = mock(EntityManager.class);
 		ConversionDownloadServlet servlet = spy(new ConversionDownloadServlet());

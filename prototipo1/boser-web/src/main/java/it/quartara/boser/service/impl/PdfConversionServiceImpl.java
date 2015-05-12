@@ -41,7 +41,7 @@ import com.lowagie.text.pdf.PdfWriter;
 public class PdfConversionServiceImpl implements PdfConversionService, Serializable {
 	
 	private static final long serialVersionUID = -6957321264439905450L;
-	private static final Logger log = LoggerFactory.getLogger(PdfConversionServiceImpl.class);
+	transient private static final Logger log = LoggerFactory.getLogger(PdfConversionServiceImpl.class);
 	
 	private float scaleFactor = 1.0f;
 

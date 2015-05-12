@@ -2,14 +2,13 @@ package it.quartara.boser.jobs;
 
 
 import static org.quartz.DateBuilder.futureDate;
-import it.quartara.boser.model.AsyncRequest;
 import it.quartara.boser.model.ExecutionState;
+import it.quartara.boser.model.PdfConversion;
+import it.quartara.boser.model.PdfConversionItem;
 import it.quartara.boser.service.PdfConversionService;
 
 import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,7 +41,7 @@ public class PdfConversionJob implements Job {
 	private String url;
 	private String destDir;
 	private String pdfFileNamePrefix;
-	private Long requestId;
+	private Long conversionItemId;
 	private EntityManagerFactory emf;
 	private PdfConversionService service;
 
@@ -61,14 +60,11 @@ public class PdfConversionJob implements Job {
 			log.error ("OutOfMemoryError sul job {}", jobKey);
 			Date now = new Date();
 			em.getTransaction().begin();
-			AsyncRequest request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-			if (request == null) {
-				/* come può accadere? */
-				log.error("il find della richiesta asincrona {} ha restituito null!!", requestId);
-			}
-			if ( now.before(DateUtils.addSeconds(request.getCreationDate(), 120))) {
+			PdfConversionItem conversionItem = em.find(PdfConversionItem.class, conversionItemId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+			PdfConversion currentConversion = conversionItem.getConversion();
+			if ( now.before(DateUtils.addSeconds(currentConversion.getCreationDate(), 300))) {
 				/*
-				 * se non sono ancora passati due minuti dalla creazione della richiesta
+				 * se non sono ancora passati cinque minuti dalla creazione della richiesta
 				 * il job viene rischedulato per l'esecuzione
 				 */
 				log.info("Il job {} viene rischedulato per l'esecuzione tra 10 secondi", jobKey);
@@ -81,16 +77,18 @@ public class PdfConversionJob implements Job {
 					scheduler.rescheduleJob(originalTrigger.getKey(), deplayedTrigger);
 				} catch (SchedulerException e) {
 					log.error ("errore di ri-schedulazione del job {}, si imposta stato=ERROR", jobKey);
-					request.getParameters().put(jobKey+".state", ExecutionState.ERROR.toString());
-					request.setLastUpdate(now);
+					conversionItem.setState(ExecutionState.ERROR);
+					conversionItem.setEndDate(now);
+					currentConversion.setLastUpdate(now);
 				}
 			} else {
 				/*
 				 * altrimenti si imposta lo stato a ERROR per evitare che riesegua all'infinito
 				 */
 				log.info("Il job {} si considera in timeout, impostazione stato=ERROR", jobKey);
-				request.getParameters().put(jobKey+".state", ExecutionState.ERROR.toString());
-				request.setLastUpdate(now);
+				conversionItem.setState(ExecutionState.ERROR);
+				conversionItem.setEndDate(now);
+				currentConversion.setLastUpdate(now);
 			}
 			em.getTransaction().commit();
 			em.close();
@@ -101,24 +99,19 @@ public class PdfConversionJob implements Job {
 		 * aggiornamento request
 		 */
 		em.getTransaction().begin();
-		AsyncRequest request = null;
 		try {
-			request = em.find(AsyncRequest.class, requestId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-			if (request == null) {
-				/* come può accadere? */
-				log.error("il find della richiesta asincrona {} ha restituito null!!", requestId);
-			}
+			Date now = new Date();
+			PdfConversionItem conversionItem = em.find(PdfConversionItem.class, conversionItemId, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+			PdfConversion currentConversion = conversionItem.getConversion();
 			ExecutionState state = ExecutionState.COMPLETED;
 			if (pdfFile == null) {
 				state = ExecutionState.ERROR;
 			}
-			Map<String, String> parameters = request.getParameters();
-			if (parameters == null) {
-				parameters = new HashMap<String, String>();
-			}
-			parameters.put(jobKey+".state", state.toString());
-			request.setLastUpdate(new Date());
+			conversionItem.setState(state);
+			conversionItem.setEndDate(now);
+			currentConversion.setLastUpdate(now);
 			log.debug("aggiornamento stato={} per il job {}", state, jobKey);
+			em.merge(currentConversion);
 			em.getTransaction().commit();
 		} catch (Exception e) {
 			/*
@@ -145,8 +138,8 @@ public class PdfConversionJob implements Job {
 		this.destDir = destDir;
 	}
 
-	public void setRequestId(Long requestId) {
-		this.requestId = requestId;
+	public void setConversionItemId(Long conversionItemId) {
+		this.conversionItemId = conversionItemId;
 	}
 
 	public void setService(PdfConversionService service) {

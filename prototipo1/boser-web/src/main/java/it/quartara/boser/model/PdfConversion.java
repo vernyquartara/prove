@@ -1,14 +1,15 @@
 package it.quartara.boser.model;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Entity
 @Table(name="PDF_CONVERTIONS")
@@ -17,40 +18,58 @@ public class PdfConversion extends PersistentEntity {
 	private short countCompleted;
 	private short countFailed;
 	private long fileSize;
-	private String filePath;
+	private String zipFilePath;
 	@Enumerated(EnumType.STRING)
 	private ExecutionState state;
+	private Date creationDate;
 	private Date startDate;
-	private short countTotal;
-	@OneToOne(targetEntity=AsyncRequest.class)
-	private AsyncRequest asyncRequest;
+	private Date endDate;
+	private Date lastUpdate;
+	@OneToMany(mappedBy="conversion", cascade=CascadeType.ALL)
+	private List<PdfConversionItem> items;
+	private String xlsFileName;
+	private float scaleFactor;
+	private String destDir;
+	
+	@Version
+	private long version;
 	
 	public int getCountWorking() {
 		int count = 0;
-		if (asyncRequest == null) {
+		if (items == null) {
 			return count;
 		}
-		Map<String, String> rp = asyncRequest.getParameters();
-		for (Entry<String, String> entry : rp.entrySet()) {
-			if (entry.getKey().endsWith("state")) {
-				ExecutionState state = ExecutionState.valueOf(entry.getValue());
-				switch (state) {
-				case STARTED:
-					count++;
-					break;
-				default:
-					break;
-				}
+		for (PdfConversionItem item : items) {
+			if (item.getState()==ExecutionState.STARTED) {
+				count++;
 			}
 		}
 		return count;
 	}
-	
-	public Date getLastUpdate() {
-		if (asyncRequest==null) {
-			return null;
+	public int getCountRemaining() {
+		int count = 0;
+		if (items == null) {
+			return count;
 		}
-		return asyncRequest.getLastUpdate();
+		for (PdfConversionItem item : items) {
+			if (item.getState()==ExecutionState.STARTED
+					|| item.getState()==ExecutionState.READY) {
+				count++;
+			}
+		}
+		return count;
+	}
+	public int getCountReady() {
+		int count = 0;
+		if (items == null) {
+			return count;
+		}
+		for (PdfConversionItem item : items) {
+			if (item.getState()==ExecutionState.READY) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	public long getFileSize() {
@@ -59,11 +78,11 @@ public class PdfConversion extends PersistentEntity {
 	public void setFileSize(long size) {
 		this.fileSize = size;
 	}
-	public String getFilePath() {
-		return filePath;
+	public String getZipFilePath() {
+		return zipFilePath;
 	}
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setZipFilePath(String filePath) {
+		this.zipFilePath = filePath;
 	}
 	public ExecutionState getState() {
 		return state;
@@ -78,10 +97,10 @@ public class PdfConversion extends PersistentEntity {
 		this.startDate = startDate;
 	}
 	public String getLabel() {
-		if (filePath != null) {
-			int start = filePath.lastIndexOf("/")+1; //FIXME se usato File.separator in inserimento, potrebbe non essere /
-			int end = filePath.lastIndexOf(".");
-			return filePath.substring(start, end);
+		if (zipFilePath != null) {
+			int start = zipFilePath.lastIndexOf("/")+1; //FIXME se usato File.separator in inserimento, potrebbe non essere /
+			int end = zipFilePath.lastIndexOf(".");
+			return zipFilePath.substring(start, end);
 		}
 		return null;
 	}
@@ -98,15 +117,81 @@ public class PdfConversion extends PersistentEntity {
 		this.countFailed = countFailed;
 	}
 	public short getCountTotal() {
-		return countTotal;
+		if (items != null) {
+			return (short) items.size();
+		}
+		return 0;
 	}
-	public void setCountTotal(short countTotal) {
-		this.countTotal = countTotal;
+
+	public Date getEndDate() {
+		return endDate;
 	}
-	public AsyncRequest getAsyncRequest() {
-		return asyncRequest;
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
-	public void setAsyncRequest(AsyncRequest asyncRequest) {
-		this.asyncRequest = asyncRequest;
+
+	public Date getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(Date lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
+	public List<PdfConversionItem> getItems() {
+		return items;
+	}
+
+	public void setItems(List<PdfConversionItem> items) {
+		this.items = items;
+	}
+
+	/**
+	 * restituisce il nome del file xls originale, senza percorso.
+	 * @return
+	 */
+	public String getXlsFileName() {
+		return xlsFileName;
+	}
+
+	public void setXlsFileName(String xlsFileName) {
+		this.xlsFileName = xlsFileName;
+	}
+
+	public float getScaleFactor() {
+		return scaleFactor;
+	}
+
+	public void setScaleFactor(float scaleFactor) {
+		this.scaleFactor = scaleFactor;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * Restituisce il percorso della directory di destinazione della conversione.
+	 * @return
+	 */
+	public String getDestDir() {
+		return destDir;
+	}
+
+	public void setDestDir(String destDir) {
+		this.destDir = destDir;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
 	}
 }

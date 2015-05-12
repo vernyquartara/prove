@@ -67,7 +67,7 @@
 				<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
 				<td><c:out value="${conv.state}"/></td>
 				<td><c:out value="${conv.countTotal}"/></td>
-				<td><c:out value="${conv.countWorking}"/></td>
+				<td><c:out value="${conv.countRemaining}"/></td>
 				<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
 				<td><c:out value="${conv.countCompleted}"/></td>
 				<td><c:out value="${conv.countFailed}"/></td>

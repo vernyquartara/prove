@@ -5,20 +5,16 @@ import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 import it.quartara.boser.jobs.PdfConversionControllerJob;
-import it.quartara.boser.jobs.PdfConversionJob;
-import it.quartara.boser.model.AsyncRequest;
 import it.quartara.boser.model.ExecutionState;
 import it.quartara.boser.model.Parameter;
 import it.quartara.boser.model.PdfConversion;
-import it.quartara.boser.service.PdfConversionFactory;
-import it.quartara.boser.service.PdfConversionService;
+import it.quartara.boser.model.PdfConversionItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,7 +35,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -52,7 +47,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@WebServlet("/xlsToPdf")
+@WebServlet(loadOnStartup=-1,urlPatterns={"/xlsToPdf"})
 public class ConversionServlet extends BoserServlet {
 
 	private static final long serialVersionUID = -6738304809439599277L;
@@ -131,21 +126,19 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("problemi di scrittura file xls", e);
 		}
 		/*
-		 * creazione oggetto AsyncRequest
+		 * creazione oggetto PdfConversion
 		 */
 		Date now = new Date();
-		AsyncRequest asyncRequest = new AsyncRequest();
-		asyncRequest.setState(ExecutionState.STARTED);
-		asyncRequest.setCreationDate(now);
-		em.persist(asyncRequest);
-		log.debug("creato nuovo oggetto AsyncRequest id={}", asyncRequest.getId());
-		Map<String, String> asyncRequestParams = new HashMap<String, String>();
-		/*
-		 * creazione e schedulazione di un job per ogni url
-		 * a partire dal file xls
-		 */
+		float scaleFactor = Float.valueOf(getFormField(items, "scale").getString());
+		PdfConversion pdfConversion = new PdfConversion();
+		pdfConversion.setState(ExecutionState.READY);
+		pdfConversion.setCreationDate(now);
+		pdfConversion.setXlsFileName(originalName);
+		pdfConversion.setScaleFactor(scaleFactor);
 		String destDir = pdfRepo+"/"+originalName.substring(0, originalName.lastIndexOf("."));
 		log.debug("dest dir: {}", destDir);
+		pdfConversion.setDestDir(destDir);
+		em.persist(pdfConversion);
 		new File(destDir).mkdirs();
 		Workbook wb = null;
 		try {
@@ -156,90 +149,29 @@ public class ConversionServlet extends BoserServlet {
 			throw new ServletException("File Excel non valido", e);
 		}
 		Sheet sheet = wb.getSheetAt(0);
-		Integer groupId = Math.abs(originalName.hashCode());
-		SchedulerFactory schedulerFactory = (StdSchedulerFactory) request.getServletContext()
-                .getAttribute(QuartzInitializerListener.QUARTZ_FACTORY_KEY);
-		Scheduler scheduler;
-		try {
-			scheduler = schedulerFactory.getScheduler();
-			scheduler.standby(); //per evitare che i job partano prima che il thread corrente abbia terminato
-		} catch (SchedulerException e) {
-			em.getTransaction().rollback();
-			em.close();
-			throw new ServletException("Errore di creazione dello scheduler", e);
-		}
-		float scaleFactor = Float.valueOf(getFormField(items, "scale").getString());
-		PdfConversionService service = PdfConversionFactory.create(scaleFactor);
-		short countTotal = 0;
+		List<PdfConversionItem> pdfConversionItems = new ArrayList<PdfConversionItem>();
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
 				Cell cell = row.getCell(0);
-				if (cell == null) {
-					log.warn("trovata cella nulla riga={}, skip", row.getRowNum());
-					continue;
-				}
-				Hyperlink link = cell.getHyperlink();
-				if (link != null) {
-					countTotal++;
-					String url = link.getAddress();
-					String testata = cell.getRichStringCellValue().getString();
-					log.debug("crezione job per url={}, testata={}", url, testata);
-					JobDataMap jobDataMap = new JobDataMap();
-					jobDataMap.put("url", url);
-					jobDataMap.put("destDir", destDir);
-					jobDataMap.put("pdfFileNamePrefix", testata);
-					jobDataMap.put("requestId", asyncRequest.getId());
-					jobDataMap.put("entityManagerFactory", emf);
-					jobDataMap.put("service", service);
-					//Integer jobId = url.hashCode();
-					Integer jobId = new Long(System.currentTimeMillis()).intValue();
-					JobDetail jobDetail = createJob(PdfConversionJob.class, "job"+jobId.toString(), groupId.toString(), jobDataMap);
-					asyncRequestParams.put(jobDetail.getKey().toString()+".state", ExecutionState.STARTED.toString());
-					asyncRequestParams.put(jobDetail.getKey().toString()+".url", url);
-					Trigger trigger = createTrigger("trg"+jobId.toString(), groupId.toString());
-					try {
-						scheduler.scheduleJob(jobDetail, trigger);
-					} catch (SchedulerException e) {
-						em.getTransaction().rollback();
-						em.close();
-						throw new ServletException("Errore di schedulazione del job", e);
+				if (cell!=null) {
+					Hyperlink link = cell.getHyperlink();
+					if (link != null) {
+						String url = link.getAddress();
+						String testata = cell.getRichStringCellValue().getString();
+						log.debug("crezione item per url={}, testata={}", url, testata);
+						PdfConversionItem pdfConvItem = new PdfConversionItem();
+						pdfConvItem.setUrl(url);
+						pdfConvItem.setState(ExecutionState.READY);
+						pdfConvItem.setPdfFileNamePrefix(testata);
+						pdfConvItem.setConversion(pdfConversion);
+						pdfConversionItems.add(pdfConvItem);
 					}
 				}
 			}
 		}
-		asyncRequest.setParameters(asyncRequestParams);
-		em.merge(asyncRequest);
-		/*
-		 * creazione oggetto PdfConversion
-		 */
-		PdfConversion pdfConversion = new PdfConversion();
-		pdfConversion.setState(ExecutionState.STARTED);
-		pdfConversion.setStartDate(now);
-		pdfConversion.setAsyncRequest(asyncRequest);
-		pdfConversion.setCountTotal(countTotal);
-		em.persist(pdfConversion);
+		pdfConversion.setItems(pdfConversionItems);
+		em.merge(pdfConversion);
 		log.debug("creato nuovo oggetto PdfConversion id={}", pdfConversion.getId());
-		/*
-		 * creazione e schedulazione del job controller
-		 */
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put("entityManagerFactory", emf);
-		jobDataMap.put("requestId", asyncRequest.getId());
-		jobDataMap.put("pdfConversionId", pdfConversion.getId());
-		jobDataMap.put("destDir", destDir);
-		jobDataMap.put("originalXlsFilePath", xlsFile.getAbsolutePath());
-		jobDataMap.put("originalXlsFileName", originalName);
-		JobDetail jobDetail = createJob(PdfConversionControllerJob.class, "ctrl", groupId.toString(), jobDataMap);
-		Trigger trigger = createControllerTrigger("ctrlTrg", groupId.toString());
-		try {
-			log.debug("schedulazione job controller");
-			scheduler.scheduleJob(jobDetail, trigger);
-			scheduler.start();
-		} catch (SchedulerException e) {
-			em.getTransaction().rollback();
-			em.close();
-			throw new ServletException("Errore di schedulazione del job controller", e);
-		}
 		/*
 		 * chiusura transazione
 		 */
@@ -253,34 +185,6 @@ public class ConversionServlet extends BoserServlet {
 		response.sendRedirect("/conversionHome");
 	}
 
-	private Trigger createControllerTrigger(String triggerId, String groupId) {
-		Trigger trigger = newTrigger()
-				.withIdentity(triggerId, groupId)
-				.withSchedule(simpleSchedule()
-							.withIntervalInSeconds(15)
-							.withMisfireHandlingInstructionNextWithRemainingCount()
-							.repeatForever())
-				.startAt(futureDate(120, IntervalUnit.SECOND))
-				.build();
-		return trigger;
-	}
-
-	private Trigger createTrigger(String triggerId, String groupId) {
-		Trigger trigger = newTrigger()
-				.withIdentity(triggerId, groupId)
-				.withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
-				.startAt(futureDate(30, IntervalUnit.SECOND))
-				.build();
-		return trigger;
-	}
-
-	private JobDetail createJob(Class<? extends Job> jobClass, String jobId, String groupId, JobDataMap jobDataMap) {
-		JobDetail job = newJob(jobClass)
-				.withIdentity(jobId, groupId)
-				.usingJobData(jobDataMap)
-				.build();
-		return job;
-	}
 
 	private FileItem getFormField(List<FileItem> items, String fieldName) {
 		for (FileItem fileItem : items) {
@@ -289,6 +193,44 @@ public class ConversionServlet extends BoserServlet {
 			}
 		}
 		return null;
+	}
+
+	/*
+	 * Crea il job controller che schedulerà tutti i job.
+	 * (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
+	@Override
+	public void init() throws ServletException {
+		log.debug("inizializzazione job Controller");
+		EntityManagerFactory emf =
+		           (EntityManagerFactory)getServletContext().getAttribute("emf");
+		SchedulerFactory schedulerFactory = (StdSchedulerFactory) getServletContext()
+                .getAttribute(QuartzInitializerListener.QUARTZ_FACTORY_KEY);
+		Scheduler scheduler;
+		try {
+			scheduler = schedulerFactory.getScheduler();
+			
+			JobDataMap jobDataMap = new JobDataMap();
+			jobDataMap.put("entityManagerFactory", emf);
+			JobDetail jobDetail =  newJob(PdfConversionControllerJob.class)
+									.withIdentity("JOBCTRL", "BOSER")
+									.usingJobData(jobDataMap)
+									.build();
+			Trigger trigger = newTrigger()
+								.withIdentity("JOBCTRLTRG", "BOSER")
+								.withSchedule(simpleSchedule()
+											.withIntervalInSeconds(15)
+											.withMisfireHandlingInstructionNextWithRemainingCount()
+											.repeatForever())
+								.startAt(futureDate(30, IntervalUnit.SECOND))
+								.build();
+		
+			scheduler.scheduleJob(jobDetail, trigger);
+			log.info("job controller schedulato");
+		} catch (SchedulerException e) {
+			log.error("scheduler non trovato!!", e);
+		}
 	}
 
 }

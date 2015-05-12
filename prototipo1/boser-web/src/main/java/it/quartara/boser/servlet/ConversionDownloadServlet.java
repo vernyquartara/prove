@@ -36,7 +36,7 @@ public class ConversionDownloadServlet extends BoserServlet {
 		
 		EntityManager em = getEntityManager();
 		PdfConversion conversion = em.find(PdfConversion.class, Long.valueOf(conversionId));
-		String filePath = conversion.getFilePath();
+		String filePath = conversion.getZipFilePath();
 		log.debug("path: {}", filePath);
 		File file = new File(filePath);
 		String attachmentName = filePath.substring(filePath.lastIndexOf("/")+1);
