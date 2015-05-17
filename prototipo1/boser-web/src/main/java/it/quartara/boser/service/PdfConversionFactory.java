@@ -12,8 +12,4 @@ public class PdfConversionFactory {
 		return new PdfConversionServiceImpl();
 	}
 	
-	public static PdfConversionService create(float scaleFactor) {
-		return new PdfConversionServiceImpl(scaleFactor);
-	}
-
 }

@@ -8,7 +8,6 @@ import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
-import it.quartara.boser.model.AsyncRequest;
 import it.quartara.boser.model.ExecutionState;
 import it.quartara.boser.model.PdfConversion;
 

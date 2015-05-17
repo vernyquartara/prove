@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
+import com.lowagie.text.PageSize;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
@@ -43,15 +44,9 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 	private static final long serialVersionUID = -6957321264439905450L;
 	transient private static final Logger log = LoggerFactory.getLogger(PdfConversionServiceImpl.class);
 	
-	private float scaleFactor = 1.0f;
-
 	public PdfConversionServiceImpl() {
 	}
 	
-	public PdfConversionServiceImpl(float scaleFactor) {
-		this.scaleFactor = scaleFactor;
-	}
-
 	@Override
 	public File convertToPdf(String destDir, String url) {
 		return convertToPdf(destDir, url, null);
@@ -92,19 +87,34 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 			transcoder.transcode(transcoderInput, transcoderOutput);
 			log.debug("conversione in pdf effettuata correttamente");
 			/*
-			 * ridimensionamento PDF
+			 * ridimensionamento PDF e suddivisione in pagine
 			 */
-			log.debug("ridimensionamento pdf di un fattore {} ...", scaleFactor);
+			log.debug("ridimensionamento pdf e suddivisione in pagine");
 			PdfReader reader = new PdfReader(new ByteArrayInputStream(intermediatePdf.toByteArray()));
 			Rectangle originalRectangle = reader.getPageSize(1);
-		    Rectangle resizedRectagle = new Rectangle(originalRectangle.getWidth()*scaleFactor, 
-		    										  originalRectangle.getHeight()*scaleFactor);
-		    Document doc = new Document(resizedRectagle, 0, 0, 0, 0);
+			
+			float wOut = PageSize.A4.getWidth();
+			float hOut = PageSize.A4.getHeight();
+			
+			float scale = wOut / originalRectangle.getWidth(); //rapporto la larghezza A4 e la larghezza originale
+			float scaledHeigth = originalRectangle.getHeight() * scale; //altezza originale scalata
+			int numPages = (int) Math.ceil(scaledHeigth / hOut); //numero di pagine calcolato in base all'altezza scalata
+			
+		    Document doc = new Document(PageSize.A4);
 		    PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(destFile));
 		    doc.open();
-		    PdfContentByte cb = writer.getDirectContent();
+		    PdfContentByte content = writer.getDirectContent();
 		    PdfImportedPage page = writer.getImportedPage(reader, 1);
-		    cb.addTemplate(page, scaleFactor, 0, 0, scaleFactor, 1.0f, 1.0f);
+		    
+		    float yOffset = hOut - scaledHeigth; //offset verticale iniziale
+		    int i = 0;
+	        do {
+	        	content.addTemplate(page, scale, 0, 0, scale, 0, yOffset);
+	        	doc.newPage();
+	        	yOffset += hOut;
+	        	i++;
+	        } while (i<numPages);
+		    
 		    doc.close();
 		    log.debug("ridimensionamento effettuato correttamente");
 		    /*
