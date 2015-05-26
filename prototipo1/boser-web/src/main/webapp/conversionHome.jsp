@@ -23,20 +23,15 @@
 		<form action="/xlsToPdf" method="post" enctype="multipart/form-data">
 			<input type="file" name="file" size="50" />
 			<input type="hidden" name="crawlerId" value="1" />
-			<select name="scale" title="seleziona il fattore di ingrandimento">
-				<option value="1.0f">100%</option>
-				<option value="1.25f">125%</option>
-				<option value="1.5f">150%</option>
-				<option value="1.75f">175%</option>
-				<option value="2.0f">200%</option>
-			</select>
 			<input type="submit" value="Upload File" />
 		</form>
 	</div>
 	<div id="logo" onclick="showCredits();">boser</div>
 </div>
+<form action="/delConvs" method="post" name="delete" enctype="application/x-www-form-urlencoded">
 <div id="tabella">
-	<p>Conversioni Effettuate  (ricarica la pagina (F5) per aggiornare i dati)</p>
+	<p>Conversioni Effettuate  (ricarica la pagina (F5) per aggiornare i dati)
+	<input type="submit" value="Cancella"/>definitivamente le conversioni selezionate</p>
 	<table>
 		<thead>
 			<tr>
@@ -50,33 +45,36 @@
 				<th>pdf OK</th>
 				<th>pdf KO</th>
 				<th>KB zip</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
-		<c:forEach items="${convertions}" var="conv">
-			<tr>
-				<td class="conv_id"><c:out value="${conv.id}"/></td>
-				<td>
-					<a href='<c:url value="/conversionDownload">
-							<c:param name="conversionId" value="${conv.id}"/>
-						</c:url>
-							'>
-						<c:out value="${conv.label}"/>
-					</a>
-				</td>
-				<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-				<td><c:out value="${conv.state}"/></td>
-				<td><c:out value="${conv.countTotal}"/></td>
-				<td><c:out value="${conv.countRemaining}"/></td>
-				<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
-				<td><c:out value="${conv.countCompleted}"/></td>
-				<td><c:out value="${conv.countFailed}"/></td>
-				<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
-			</tr>
-		</c:forEach>
+			<c:forEach items="${convertions}" var="conv">
+				<tr>
+					<td class="conv_id"><c:out value="${conv.id}"/></td>
+					<td>
+						<a href='<c:url value="/conversionDownload">
+								<c:param name="conversionId" value="${conv.id}"/>
+							</c:url>
+								'>
+							<c:out value="${conv.label}"/>
+						</a>
+					</td>
+					<td><fmt:formatDate value="${conv.startDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+					<td><c:out value="${conv.state}"/></td>
+					<td><c:out value="${conv.countTotal}"/></td>
+					<td><c:out value="${conv.countRemaining}"/></td>
+					<td><fmt:formatDate value="${conv.lastUpdate}" pattern="HH:mm:ss"/></td>
+					<td><c:out value="${conv.countCompleted}"/></td>
+					<td><c:out value="${conv.countFailed}"/></td>
+					<td><fmt:formatNumber maxFractionDigits="0" value="${conv.fileSize/1024}" /></td>
+					<td><input type="checkbox" name="convId" value="${conv.id}"/></td>
+				</tr>
+			</c:forEach>
 		</tbody>
 	</table>
 </div>
+</form>
 
 <div id="legenda">
 	<ol>
