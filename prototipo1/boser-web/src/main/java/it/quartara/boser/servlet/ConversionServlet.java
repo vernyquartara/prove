@@ -129,12 +129,10 @@ public class ConversionServlet extends BoserServlet {
 		 * creazione oggetto PdfConversion
 		 */
 		Date now = new Date();
-		float scaleFactor = Float.valueOf(getFormField(items, "scale").getString());
 		PdfConversion pdfConversion = new PdfConversion();
 		pdfConversion.setState(ExecutionState.READY);
 		pdfConversion.setCreationDate(now);
 		pdfConversion.setXlsFileName(originalName);
-		pdfConversion.setScaleFactor(scaleFactor);
 		String destDir = pdfRepo+"/"+originalName.substring(0, originalName.lastIndexOf("."));
 		log.debug("dest dir: {}", destDir);
 		pdfConversion.setDestDir(destDir);

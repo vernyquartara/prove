@@ -28,7 +28,6 @@ public class PdfConversion extends PersistentEntity {
 	@OneToMany(mappedBy="conversion", cascade=CascadeType.ALL)
 	private List<PdfConversionItem> items;
 	private String xlsFileName;
-	private float scaleFactor;
 	private String destDir;
 	
 	@Version
@@ -157,14 +156,6 @@ public class PdfConversion extends PersistentEntity {
 
 	public void setXlsFileName(String xlsFileName) {
 		this.xlsFileName = xlsFileName;
-	}
-
-	public float getScaleFactor() {
-		return scaleFactor;
-	}
-
-	public void setScaleFactor(float scaleFactor) {
-		this.scaleFactor = scaleFactor;
 	}
 
 	public Date getCreationDate() {
