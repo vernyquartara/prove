@@ -28,6 +28,9 @@
 	</div>
 	<div id="logo" onclick="showCredits();">boser</div>
 </div>
+<div id="nav">
+	<a href="<c:url value="/singleConversion.jsp"/>">Converti un singolo articolo</a>
+</div>
 <form action="/delConvs" method="post" name="delete" enctype="application/x-www-form-urlencoded">
 <div id="tabella">
 	<p>Conversioni Effettuate  (ricarica la pagina (F5) per aggiornare i dati)
