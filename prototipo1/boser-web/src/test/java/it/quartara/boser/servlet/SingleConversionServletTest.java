@@ -32,11 +32,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.mockpolicies.Slf4jMockPolicy;
+import org.powermock.core.classloader.annotations.MockPolicy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SingleConversionServlet.class, PdfConversionFactory.class})
+@MockPolicy(Slf4jMockPolicy.class)
 public class SingleConversionServletTest {
 
 	@Test

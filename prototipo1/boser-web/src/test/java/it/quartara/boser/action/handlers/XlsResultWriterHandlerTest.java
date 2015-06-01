@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.mockpolicies.Slf4jMockPolicy;
@@ -47,7 +48,7 @@ import org.powermock.reflect.Whitebox;
 @MockPolicy(Slf4jMockPolicy.class)
 public class XlsResultWriterHandlerTest {
 
-	@Test
+	@Test @Ignore
 	public void testHappyPath() throws Exception {
 		EntityManager em = mock(EntityManager.class);
 		String repo = "target/test-output/searchRepo";

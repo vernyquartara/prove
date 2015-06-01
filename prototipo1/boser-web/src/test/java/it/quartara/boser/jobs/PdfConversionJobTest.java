@@ -26,6 +26,8 @@ import javax.persistence.LockModeType;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.api.mockito.mockpolicies.Slf4jMockPolicy;
+import org.powermock.core.classloader.annotations.MockPolicy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.quartz.JobDetail;
@@ -40,6 +42,7 @@ import org.quartz.TriggerKey;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PdfConversionFactory.class, PdfConversionJob.class})
+@MockPolicy(Slf4jMockPolicy.class)
 public class PdfConversionJobTest {
 	
 	@SuppressWarnings("unchecked")
