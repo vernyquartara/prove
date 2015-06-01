@@ -29,6 +29,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Hyperlink;
@@ -137,7 +138,11 @@ public class ConversionServlet extends BoserServlet {
 		log.debug("dest dir: {}", destDir);
 		pdfConversion.setDestDir(destDir);
 		em.persist(pdfConversion);
-		new File(destDir).mkdirs();
+		File destDirFile = new File(destDir);
+		if (destDirFile.exists()) {
+			FileUtils.deleteDirectory(destDirFile);
+		}
+		destDirFile.mkdirs();
 		Workbook wb = null;
 		try {
 			wb = WorkbookFactory.create(xlsFile);
