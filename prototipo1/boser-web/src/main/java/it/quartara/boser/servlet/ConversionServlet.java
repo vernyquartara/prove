@@ -12,6 +12,7 @@ import it.quartara.boser.model.PdfConversionItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,13 +36,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.quartz.DateBuilder.IntervalUnit;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
-import org.quartz.DateBuilder.IntervalUnit;
 import org.quartz.ee.servlet.QuartzInitializerListener;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -102,9 +103,7 @@ public class ConversionServlet extends BoserServlet {
 		 */
 		String crawlerId = getFormField(items, "crawlerId").getString();
 		log.debug("crawler id: {}", crawlerId);
-		EntityManagerFactory emf =
-		           (EntityManagerFactory)getServletContext().getAttribute("emf");
-		EntityManager em = emf.createEntityManager();
+		EntityManager em = getEntityManager();
 		em.getTransaction().begin();
 		Parameter param = em.find(Parameter.class, "SEARCH_REPO");
 		String repo = param.getValue();
@@ -129,6 +128,7 @@ public class ConversionServlet extends BoserServlet {
 		 * creazione oggetto PdfConversion
 		 */
 		Date now = new Date();
+		String fileNamePrefix = new SimpleDateFormat("yyyyMMdd").format(now);
 		PdfConversion pdfConversion = new PdfConversion();
 		pdfConversion.setState(ExecutionState.READY);
 		pdfConversion.setCreationDate(now);
@@ -160,7 +160,7 @@ public class ConversionServlet extends BoserServlet {
 						PdfConversionItem pdfConvItem = new PdfConversionItem();
 						pdfConvItem.setUrl(url);
 						pdfConvItem.setState(ExecutionState.READY);
-						pdfConvItem.setPdfFileNamePrefix(testata);
+						pdfConvItem.setPdfFileNamePrefix(fileNamePrefix+testata);
 						pdfConvItem.setConversion(pdfConversion);
 						pdfConversionItems.add(pdfConvItem);
 					}
