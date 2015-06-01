@@ -8,6 +8,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -59,25 +60,32 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 						  +UrlHelper.getLastPart(url)+".pdf";
 		File destFile = new File(destDir, fileName);
 		log.debug("file destinazione={}", destFile.getAbsolutePath());
+		ImageRenderer imageRenderer = new ImageRenderer();
+		imageRenderer.setLoadImages(Boolean.TRUE, Boolean.FALSE);
+		Transcoder transcoder = new PDFTranscoder();
+		byte[] svgBytes = null;
+		ByteArrayOutputStream outputStream = null;
 		try {
-			ImageRenderer imageRenderer = new ImageRenderer();
-			imageRenderer.setLoadImages(Boolean.TRUE, Boolean.FALSE);
-			Transcoder transcoder = new PDFTranscoder();
 			/*
 			 * conversione html in SVG
 			 */
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			outputStream = new ByteArrayOutputStream();
 			//File tempFile = File.createTempFile("svg", null);
 			//tempFile.deleteOnExit();
 			//FileOutputStream outputStream = new FileOutputStream(tempFile);
 			log.debug("avvio rendering SVG");
 			imageRenderer.renderURL(url, outputStream, ImageRenderer.Type.SVG);
 			log.debug("fine rendering SVG");
-			byte[] svgBytes = outputStream.toByteArray();
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(svgBytes);
+			svgBytes = outputStream.toByteArray();
+		} catch (Exception e) {
+			log.error("problema di conversione in SVG per l'url: "+url, e);
+			return null;
+		}
+		try {
 			/*
 			 * conversione SVG in PDF
 			 */
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(svgBytes);
 			//FileInputStream inputStream = new FileInputStream(tempFile);
 			TranscoderInput transcoderInput = new TranscoderInput(inputStream);
 			ByteArrayOutputStream intermediatePdf = new ByteArrayOutputStream();
@@ -123,10 +131,21 @@ public class PdfConversionServiceImpl implements PdfConversionService, Serializa
 			outputStream.close();
 			inputStream.close();
 		} catch (Exception e) {
-			log.error("problema di conversione in pdf per l'url: "+url, e);
-			return null;
+			log.error("problema di conversione in PDF per l'url: "+url, e);
+			/*
+			 * si restituisce l'SVG
+			 */
+			try {
+				File svgFile = new File(destDir, fileName.replace(".pdf", ".svg"));
+				FileOutputStream fileOut = new FileOutputStream(svgFile);
+				fileOut.write(svgBytes);
+				fileOut.close();
+				return svgFile;
+			} catch (IOException e1) {
+				log.error("problema di scrittura file SVG", e1);
+				return null;
+			}
 		}
-		
 		return destFile;
 	}
 	
