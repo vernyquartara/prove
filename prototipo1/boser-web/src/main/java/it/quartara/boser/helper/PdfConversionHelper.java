@@ -71,9 +71,11 @@ public class PdfConversionHelper {
 		for (Row row : sheet) {
 			if (row.getPhysicalNumberOfCells()>0) {
 				Cell cell = row.getCell(0);
-				Hyperlink link = cell.getHyperlink();
-				if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
-					cell.setCellStyle(cellStyle);
+				if (cell!=null) {
+					Hyperlink link = cell.getHyperlink();
+					if (link != null && urlStateMap.get(link.getAddress())==ExecutionState.ERROR) {
+						cell.setCellStyle(cellStyle);
+					}
 				}
 			}
 		}
