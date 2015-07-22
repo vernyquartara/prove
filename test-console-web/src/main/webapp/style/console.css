@@ -1,0 +1,79 @@
+body {
+	font-family: monospace;
+	font-weight: 700;
+	line-height: 13px;
+	color: #000000;
+}
+
+#barra {
+    background-color: #ff3600;
+    height: 77px;
+    border-top-color: #d62d00;
+    border-top-width: 4px;
+    border-top-style: solid;
+    border-bottom-color: #d62d00;
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+    color: #ffffff;
+}
+
+#pulsanti {
+	float: left;
+    width: 800px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    padding-left: 10px;
+    position: relative;
+    display: block;
+}
+
+.istruzioni {
+}
+
+#logo  {
+	float: right;
+	font-size: 48px;
+	line-height: 24px;
+	color: #ffffff;
+	padding-top: 25px;
+	padding-bottom: auto;
+	padding-right: 20px;
+}
+
+#tabella {
+	margin-top: 30px;
+	color: #000000;
+	width: 100%;
+}
+
+table, th, td {
+    border: 1px solid #9a9a9a;
+    border-collapse: collapse;
+    font-weight: normal;
+}
+
+th, td {
+    padding: 7px;
+    text-align: center;
+}
+
+th, .conv_id {
+	font-weight: bold;
+}
+
+#legenda {
+	color: #000000;
+	font-weight: normal;
+}
+
+#nav {
+	font-weight: normal;
+	padding-top: 5px;
+	padding-bottom: 0px;
+}
+
+#error {
+	font-weight: normal;
+	font-style: italic;
+}
+
