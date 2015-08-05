@@ -109,7 +109,9 @@ public class PdfConversionHelper {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.toLowerCase().endsWith(".pdf")
-						|| name.toLowerCase().endsWith(".xls");
+						|| name.toLowerCase().endsWith(".xls")
+						|| name.toLowerCase().endsWith(".svg")
+						;
 			}
 		});
 		for (File file : files) {
