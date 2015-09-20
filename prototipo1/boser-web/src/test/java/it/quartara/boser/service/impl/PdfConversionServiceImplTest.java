@@ -33,6 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Rectangle;
+import com.lowagie.text.RectangleReadOnly;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
@@ -55,7 +56,8 @@ public class PdfConversionServiceImplTest {
 		whenNew(FileOutputStream.class).withAnyArguments().thenReturn(mock(FileOutputStream.class));
 		PdfReader pdfReader = mock(PdfReader.class);
 		whenNew(PdfReader.class).withAnyArguments().thenReturn(pdfReader);
-		Rectangle r = PageSize.A4;
+		//Rectangle r = PageSize.A4;
+		Rectangle r = new RectangleReadOnly(538.33f, 2551.51f);
 		when(pdfReader.getPageSize(1)).thenReturn(r);
 		PdfWriter writer = mock(PdfWriter.class);
 		mockStatic(PdfWriter.class);
