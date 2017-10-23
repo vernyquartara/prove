@@ -12,7 +12,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
-import it.quartara.boser.service.PdfConversionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -31,13 +30,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.RectangleReadOnly;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfWriter;
+
+import it.quartara.boser.service.PdfConversionService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PdfConversionServiceImpl.class, PdfWriter.class})
@@ -71,7 +71,7 @@ public class PdfConversionServiceImplTest {
 		File pdfFile = service.convertToPdf(destDir, urlToConvert, testata);
 		
 		assertThat(pdfFile.getAbsolutePath(), 
-				   endsWith("target/test-output/"+testata+"_car_sharing_enjoy_supera_i_2_5_milioni_di_noleggi_.html.pdf"));
+				   endsWith("target"+File.separator+"test-output"+File.separator+testata+"_car_sharing_enjoy_supera_i_2_5_milioni_di_noleggi_.html.pdf"));
 		verify(imageRenderer).renderURL(any(String.class), any(ByteArrayOutputStream.class), eq(ImageRenderer.Type.SVG));
 		verify(transcoder).transcode(any(TranscoderInput.class), any(TranscoderOutput.class));
 		verify(content).addTemplate(any(PdfImportedPage.class), eq(1.0f), eq(0f), eq(0f), eq(1.0f), eq(0f), anyFloat());
@@ -110,7 +110,7 @@ public class PdfConversionServiceImplTest {
 		File svgFile = service.convertToPdf(destDir, urlToConvert, testata);
 		
 		assertThat(svgFile.getAbsolutePath(), 
-				   endsWith("target/test-output/"+testata+"_car_sharing_enjoy_supera_i_2_5_milioni_di_noleggi_.html.svg"));
+				   endsWith("target"+File.separator+"test-output"+File.separator+testata+"_car_sharing_enjoy_supera_i_2_5_milioni_di_noleggi_.html.svg"));
 		verify(imageRenderer).renderURL(any(String.class), any(ByteArrayOutputStream.class), eq(ImageRenderer.Type.SVG));
 		verify(fos).write(any(byte[].class));
 		verify(fos).close();
